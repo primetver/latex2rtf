@@ -287,16 +287,17 @@ void startParagraph(const char *style, int indenting)
 
     switch(indenting) {
     
-        case PARAGRAPH_SECTION_TITLE:         /* titles are never indented */
+        case PARAGRAPH_SECTION_TITLE:         /* titles are never positive indented */
             diagnostics(5, "PARAGRAPH_SECTION_TITLE");
-            parindent = 0;
+	    if (parindent > 0) 
+	        parindent = 0;
             break;
     
         case PARAGRAPH_FIRST:                 /* French indents first paragraph */
             diagnostics(5, "PARAGRAPH_FIRST");
             if (!FrenchMode)
-                parindent = 0;
-            break;
+		parindent = 0;
+	    break;
             
         case PARAGRAPH_EQUATION:              /* typically centered with no indent */
             diagnostics(5, "PARAGRAPH_EQUATION");
@@ -350,7 +351,10 @@ void startParagraph(const char *style, int indenting)
     }
 
     if (g_column_new) {
-        fprintRTF("\\column\n"); /* causes new column */
+        if (twocolumn)
+	  fprintRTF("\\column\n"); /* causes new column */
+	else
+	  fprintRTF("\\page\n");   /* added: causes new page */
         g_column_new = FALSE;
     }
 
@@ -388,7 +392,7 @@ void startParagraph(const char *style, int indenting)
     if (g_right_margin_indent != 0)
         fprintRTF("\\ri%d", g_right_margin_indent);
 
-    fprintRTF("\\fi%d ", parindent);
+    fprintRTF("\\fi%d ", parindent);  /* what about style \\fi ? */
     
     /* these are strstr because might end in 0 */
     if (strstr("part",the_style)    == NULL && 
@@ -419,7 +423,7 @@ void startParagraph(const char *style, int indenting)
             g_paragraph_inhibit_indent = FALSE;
     }
      
-    if (indenting == PARAGRAPH_SECTION_TITLE && !FrenchMode)
+    if (indenting == PARAGRAPH_SECTION_TITLE && !FrenchMode && !RussianMode)
     	next_paragraph_after_section = TRUE;
     else
     	next_paragraph_after_section = FALSE;

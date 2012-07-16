@@ -352,8 +352,12 @@ purpose: converts inputfile and writes result to outputfile
                 changeTexMode(MODE_HORIZONTAL);
                 if (GermanMode)
                     TranslateGerman();
-                else
-                    fprintRTF("\"");
+                else {
+		  cNext = getTexChar();
+		  if (cNext != '-')
+		    fprintRTF("\"");
+		  ungetTexChar(cNext);
+		}
                 break;
 
             case '<':

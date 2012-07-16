@@ -1,0 +1,46 @@
+% Support file for latex2rtf conversion eskdtext class documents  
+
+\usepackage[a4paper]{geometry}
+\geometry{tmargin=20mm,bmargin=20mm,lmargin=20mm,rmargin=20mm}
+\setlength{\parindent}{15mm}
+\setlength{\bigskipamount}{10mm}
+
+\renewcommand{\lstlistingname}{Листинг}
+\renewcommand{\refname}{Cписок использованных источников}
+\renewcommand{\nomname}{Перечень принятых сокращений}
+
+% счетчики пунктов, подчинены разделу и подподразделу
+\newcounter{bigpoint}[section]
+\newcommand{\bigpoint}{\refstepcounter{bigpoint}\arabic{section}.\arabic{bigpoint}\quad{}}
+\newcounter{bigsubpoint}[bigpoint]
+\newcommand{\bigsubpoint}{\refstepcounter{bigsubpoint}\arabic{section}.\arabic{bigpoint}.\arabic{bigsubpoint}\quad{}}
+\newcounter{point}[subsection]
+\newcommand{\point}{\refstepcounter{point}\arabic{section}.\arabic{subsection}.\arabic{point}\quad{}}
+\newcounter{subpoint}[point]
+\newcommand{\subpoint}{\refstepcounter{subpoint}\arabic{section}.\arabic{subsection}.\arabic{point}.\arabic{subpoint}\quad{}}
+\newcounter{smallpoint}[subsubsection]
+\newcommand{\smallpoint}{\refstepcounter{smallpoint}\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.\arabic{smallpoint}\quad{}}
+\newcounter{smallsubpoint}[smallpoint]
+\newcommand{\smallsubpoint}{\refstepcounter{smallsubpoint}\arabic{section}.\arabic{subsection}.\arabic{subsubsection}.\arabic{smallpoint}.\arabic{smallsubpoint}\quad{}}
+
+% счетчики прикладного назначения numi, numii, subnumi, subnumii
+\newcounter{numi}
+\newcommand{\numi}{\refstepcounter{numi}\arabic{numi}}
+\newcounter{subnumi}[numi]
+\newcommand{\subnumi}{\refstepcounter{subnumi}\arabic{numi}.\arabic{subnumi}}
+\newcounter{numii}
+\newcommand{\numii}{\refstepcounter{numii}\arabic{numii}}
+\newcounter{subnumii}[numii]
+\newcommand{\subnumii}{\refstepcounter{subnumii}\arabic{numii}.\arabic{subnumii}}
+
+% ESKD - поддержка базовых команд
+\newcommand{\ESKDcompany}[1]{\providecommand{\ESKDtheCompany}{#1}}
+\newcommand{\ESKDgroup}[1]{\providecommand{\ESKDtheGroup}{#1}}
+\newcommand{\ESKDdocName}[1]{\providecommand{\ESKDtheDocName}{#1}}
+\newcommand{\ESKDsignature}[1]{\providecommand{\ESKDtheSignature}{#1}}
+\newcommand{\ESKDtitleApprovingSheet}[1]{\providecommand{\ESKDtheTitleApprovingSheet}{#1}}
+
+
+% стандартные настройки для ПРАЙМ ГРУП
+\ESKDcompany{\includegraphics[width=0.45\textwidth]{pg2}}
+\ESKDgroup{ПРМА}

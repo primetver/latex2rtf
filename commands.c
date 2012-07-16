@@ -256,7 +256,6 @@ static CommandArray commands[] = {
     {"newsavebox", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"usebox", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"subfigure", CmdSubFigure, 0},
-
     {"quad", CmdQuad, 1},
     {"qquad", CmdQuad, 2},
     {"textsuperscript", CmdSuperscript, 1},
@@ -283,14 +282,14 @@ static CommandArray commands[] = {
     {"Typein", CmdIgnoreParameter, One_Opt_One_NormParam},
     {"includeonly", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"nocite", CmdNoCite, No_Opt_One_NormParam},
-    {"stepcounter", CmdIgnoreParameter, No_Opt_One_NormParam},
-    {"refstepcounter", CmdIgnoreParameter, No_Opt_One_NormParam},
+    {"stepcounter", CmdCounter, COUNTER_STEP},
+    {"refstepcounter", CmdCounter, COUNTER_STEP},
     {"fnsymbol", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"Alph", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"alph", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"Roman", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"roman", CmdIgnoreParameter, No_Opt_One_NormParam},
-    {"arabic", CmdIgnoreParameter, No_Opt_One_NormParam},
+    {"arabic", CmdCounter, COUNTER_VALUE},
     {"newcount", CmdIgnoreDef, 0},
     {"output", CmdIgnoreDef, 0},
     {"value", CmdCounter, COUNTER_VALUE},
@@ -488,6 +487,7 @@ static CommandArray PreambleCommands[] = {
     {"AtEndDocument", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"docnumber", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"graphicspath",  CmdGraphicsPath, 0 },
+    {"ESKDtheTitle",  CmdESKDtheTitle, 0 },
     {"", NULL, 0}
 };                              /* end of list */
 

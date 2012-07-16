@@ -91,6 +91,7 @@ void CmdList(int code);
 #define COUNTER_SET   2
 #define COUNTER_ADD   3
 #define COUNTER_VALUE 4
+#define COUNTER_STEP  5
 
 void CmdCounter(int code);
 
@@ -190,3 +191,9 @@ int  TryConditionSet(char *command);
 void CmdAppendix(int code);
 void CmdAcronymItem(int code);
 void CmdLap(int code);
+
+/*
+typedef struct rualphatag {
+    char *cap;           	
+    char *str;         		
+} RuAlphaArray; */

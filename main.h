@@ -68,6 +68,7 @@ extern int      GermanMode;
 extern int      FrenchMode;
 extern int      RussianMode;
 extern int      CzechMode;
+extern int      ESKDMode;
 extern int      pagenumbering;
 extern int      headings;
 

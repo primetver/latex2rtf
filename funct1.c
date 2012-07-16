@@ -24,6 +24,7 @@ Authors:
     1995-1997 Ralf Schlatterbeck
     1998-2000 Georg Lehner
     2001-2002 Scott Prahl
+    2012      Nikolay Ishiev for ESKDMode (NI)
 */
 
 #include <stdlib.h>
@@ -61,7 +62,38 @@ static int g_chapter_numbering = ARABIC_NUMBERING;
 static int g_section_numbering = ARABIC_NUMBERING;
 static int g_appendix = 0;
 
+/*
+static RuAlphaArray ru_alpha[] = {
+    {'А', 'а'},
+    {'Б', 'б'},
+    {'В', 'в'},
+    {'Г', 'г'},
+    {'Д', 'д'},
+    {'Е', 'е'},
+    {'Ж', 'ж'},
+    {'И', 'и'},
+    {'К', 'к'},
+    {'Л', 'л'},
+    {'М', 'м'},
+    {'Н', 'н'},
+    {'П', 'п'},
+    {'Р', 'р'},
+    {'С', 'с'},
+    {'Т', 'т'},
+    {'У', 'у'},
+    {'Ф', 'ф'},
+    {'Х', 'х'},
+    {'Ц', 'ц'},
+    {'Ч', 'ч'},
+    {'Ш', 'ш'},
+    {'Щ', 'щ'},
+    {'Э', 'э'},
+    {'Ю', 'ю'},
+    {'Я', 'я'}
+}; */
+
 int g_processing_list_environment = FALSE;
+int g_hspace_in_list_environment = 0;
 
 void CmdNewDef(int code)
 
@@ -276,12 +308,18 @@ void CmdBeginEnd(int code)
 /* usual environments */
     if (code == CMD_BEGIN) {
         diagnostics(5, "\\begin{%s}", s);
+	PushEnvironment(GENERIC_MODE);    /* fix format tails after tabular environments changes. Need to test in all cases !!!!!! NI*/
         (void) CallParamFunc(s, ON);
     } else {
         diagnostics(5, "\\end{%s}", s);
         (void) CallParamFunc(s, OFF);
-    	if (strcmp(s, "setspace") != 0 && strcmp(s, "doublespace") != 0) 
-        	CmdIndent(INDENT_INHIBIT);
+	PopEnvironment();		 /* see above !!!!!! */
+	if (strcmp(s, "setspace") != 0 && strcmp(s, "doublespace") != 0) 
+	    CmdIndent(INDENT_INHIBIT);
+	/* some hack for Lyx: force indent after lists in eskd mode text NI*/
+	if (ESKDMode)
+	    if (strcmp(s, "itemize") == 0 || strcmp(s, "description") == 0 || strcmp(s, "enumerate") == 0)
+		CmdIndent(INDENT_USUAL);
     }
     free(s);
 }
@@ -327,10 +365,19 @@ parameter: code includes the type of the environment
 static char *FormatNumber(int formatting, int n)
 {
     char label[20];
+   
     switch (formatting) {
     
         case ALPHA_NUMBERING:
-            snprintf(label, 20, "%c", (char) (n + (int) 'A' - 1) );
+	    if (RussianMode)
+	      snprintf(label, 20, "%c", (char) (n + (int) 'A' - 1) );
+	    /*  not work yet 
+		if (n > 26)
+		snprintf(label, 20, "%d%c", (int)n/26,  ru_alpha[(n%26)-1][1]);
+	      else
+		snprintf(label, 20, "%c", (int)ru_alpha[n-1][1]); */
+	    else
+	      snprintf(label, 20, "%c", (char) (n + (int) 'A' - 1) );
             break;
     
         case ARABIC_NUMBERING:
@@ -460,6 +507,13 @@ parameter: code: type of section-recursion-level
     char *heading;
     char *unit_label;
     char *chapter_name=NULL;
+    
+    int amount = 700; /* orig was 600 NI*/
+    int hspace, orig_indent, orig_left_margin;
+    
+    orig_indent = getLength("parindent");
+    orig_left_margin = getLeftMarginIndent();
+    hspace = orig_indent + amount;
 
     toc_entry = getBracketParam();
     heading = getBraceParam();
@@ -525,7 +579,7 @@ parameter: code: type of section-recursion-level
         case SECT_NORM:
         case SECT_NORM_STAR:
             CmdVspace(VSPACE_BIG_SKIP);
-            if (g_document_type == FORMAT_APA) {
+	    if (g_document_type == FORMAT_APA) {
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
             } else {            
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
@@ -542,15 +596,19 @@ parameter: code: type of section-recursion-level
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_SMALL_SKIP);
-            break;
+            CmdVspace(VSPACE_MEDIUM_SKIP);
+	    break;
 
         case SECT_SUB:
         case SECT_SUB_STAR:
-            CmdVspace(VSPACE_MEDIUM_SKIP);
-            if (g_document_type == FORMAT_APA) {
+            CmdVspace(VSPACE_BIG_SKIP);
+	    if (g_document_type == FORMAT_APA) {
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
-            } else {            
+            } else {
+		if (RussianMode) {
+		    setLength("parindent", -amount);
+		    setLeftMarginIndent(orig_left_margin + hspace);
+		}
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
                 if (code == SECT_SUB && getCounter("secnumdepth") >= 1) {
                     incrementCounter("subsection");
@@ -558,24 +616,28 @@ parameter: code: type of section-recursion-level
                     resetTheoremCounter("subsection");
                     unit_label = FormatUnitNumber("subsection");
                     InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("  ");
+                    fprintRTF("\\tab\n");
                     free(unit_label);
-                }
+		}
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_SMALL_SKIP);
+            CmdVspace(VSPACE_MEDIUM_SKIP);
             break;
 
         case SECT_SUBSUB:
         case SECT_SUBSUB_STAR:
-            CmdVspace(VSPACE_MEDIUM_SKIP);
+            CmdVspace(VSPACE_BIG_SKIP);
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsubsection", PARAGRAPH_GENERIC);
                 fprintRTF("{\\i ");
                 ConvertString(heading);
                 fprintRTF(".} ");
-            } else {            
+            } else {
+	      	if (RussianMode) {
+		    setLength("parindent", -amount);
+		    setLeftMarginIndent(orig_left_margin + hspace);
+		}
                 startParagraph("subsubsection", PARAGRAPH_SECTION_TITLE);
                 
                 if (code == SECT_SUBSUB && (getCounter("secnumdepth") > 2 ||
@@ -586,18 +648,22 @@ parameter: code: type of section-recursion-level
                     resetTheoremCounter("subsubsection");
                     unit_label = FormatUnitNumber("subsubsection");
                     InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("  ");
+                    fprintRTF("\\tab\n");
                     free(unit_label);
                 }
                 ConvertString(heading);
                 CmdEndParagraph(0);
-                CmdVspace(VSPACE_SMALL_SKIP);
+                CmdVspace(VSPACE_MEDIUM_SKIP);
             }
             break;
 
         case SECT_SUBSUBSUB:
         case SECT_SUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
+	    if (RussianMode) {
+		    setLength("parindent", -amount);
+		    setLeftMarginIndent(orig_left_margin + hspace);
+	    }
             startParagraph("paragraph", PARAGRAPH_SECTION_TITLE);
             if (code == SECT_SUBSUBSUB && getCounter("secnumdepth") >= 3) {
                 incrementCounter("paragraph");
@@ -610,12 +676,16 @@ parameter: code: type of section-recursion-level
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_SMALL_SKIP);
+            CmdVspace(VSPACE_MEDIUM_SKIP);
             break;
 
         case SECT_SUBSUBSUBSUB:
         case SECT_SUBSUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
+	    if (RussianMode) {
+		    setLength("parindent", -amount);
+		    setLeftMarginIndent(orig_left_margin + hspace);
+	    }
             startParagraph("subparagraph", PARAGRAPH_SECTION_TITLE);
             if (code == SECT_SUBSUBSUBSUB && getCounter("secnumdepth") >= 4) {
                 incrementCounter("subparagraph");
@@ -630,6 +700,10 @@ parameter: code: type of section-recursion-level
             CmdVspace(VSPACE_SMALL_SKIP);
             break;
     }
+    
+    /* orig para & left margin indents may be changed, restore it */
+    setLength("parindent", orig_indent);
+    setLeftMarginIndent(orig_left_margin);
 
     if (heading)
         free(heading);
@@ -670,16 +744,19 @@ void CmdCaption(int code)
         CmdEndParagraph(0);
     vspace = getLength("abovecaptionskip");
     setVspace(vspace);
-    startParagraph("caption", PARAGRAPH_FIRST);
-    fprintRTF("{");
 
+    /* Different styles for figure and table captions */
     if (g_processing_figure) {
+	startParagraph("caption figure", PARAGRAPH_FIRST);
+	fprintRTF("{");
         incrementCounter("figure");
         ConvertBabelName("FIGURENAME");
         fprintRTF(" ");
         n = getCounter("figure");
         c = 'f';
     } else {
+	startParagraph("caption table", PARAGRAPH_FIRST);
+	fprintRTF("{");
         incrementCounter("table");
         ConvertBabelName("TABLENAME");
         fprintRTF(" ");
@@ -702,7 +779,10 @@ void CmdCaption(int code)
     else
         fprintRTF("%s", number);
 
-    fprintRTF(": ");
+    if (ESKDMode)
+      fprintRTF(" \\endash\n ");
+    else
+      fprintRTF(": ");
     ConvertString(thecaption);
     fprintRTF("}");
 
@@ -723,7 +803,7 @@ void CmdCounter(int code)
  purpose: handles \newcounter, \setcounter, \addtocounter, \value
  ******************************************************************************/
 {
-    char *s, *s2, *s3, *s4;
+    char *s, *s2, *s3, *s4, *p;
     int num;
 
     s = getBraceParam();
@@ -754,8 +834,19 @@ void CmdCounter(int code)
         else
             setCounter(s, num);
 
-    } else if (code == COUNTER_NEW)
-        setCounter(s, 0);
+    } else if (code == COUNTER_NEW) {
+	p = getBracketParam();
+        setCounterParent(s, 0, p);
+	if (p) free(p);
+    
+    } else if (code == COUNTER_STEP) {
+	incrementCounter(s);
+	
+    } else if (code == COUNTER_VALUE) {
+	if (getTexMode() == MODE_VERTICAL)
+             changeTexMode(MODE_HORIZONTAL);
+	fprintRTF("{%d}", getCounter(s));
+    }
 
     free(s);
 }
@@ -864,11 +955,16 @@ void CmdList(int code)
  globals  : indent
  ******************************************************************************/
 {
-    int vspace;
-    int amount = 300;
-
+    int vspace, hspace;
+    static int amount = 300;
+    
+    if (g_processing_list_environment == FALSE)
+      hspace = getLength("parindent") + amount;
+    else
+      hspace = 2 * amount; 
+  
     vspace = getLength("topsep") + getLength("parskip");
-
+   
     if (code != (INPARAENUM_MODE | ON) && code != (INPARAENUM_MODE | OFF) ) {
         if (getTexMode() == MODE_VERTICAL)
             vspace += getLength("partopsep");
@@ -881,7 +977,7 @@ void CmdList(int code)
             setVspace(vspace);
             PushEnvironment(ITEMIZE_MODE);
             setLength("parindent", -amount);
-            setLeftMarginIndent(getLeftMarginIndent() + 2 * amount);
+            setLeftMarginIndent(getLeftMarginIndent() + hspace);
             CmdIndent(INDENT_USUAL);
             break;
 
@@ -891,7 +987,7 @@ void CmdList(int code)
             g_enumerate_depth++;
             CmdItem(RESET_ITEM_COUNTER);
             setLength("parindent", -amount);
-            setLeftMarginIndent(getLeftMarginIndent() + 2 * amount);
+            setLeftMarginIndent(getLeftMarginIndent() + hspace);
             CmdIndent(INDENT_USUAL);
             break;
 
@@ -899,7 +995,7 @@ void CmdList(int code)
             setVspace(vspace);
             PushEnvironment(DESCRIPTION_MODE);
             setLength("parindent", -amount);
-            setLeftMarginIndent(getLeftMarginIndent() + 2 * amount);
+            setLeftMarginIndent(getLeftMarginIndent() + hspace);
             CmdIndent(INDENT_USUAL);
             break;
 
@@ -981,7 +1077,7 @@ void CmdItem(int code)
     switch (code) {
         case ITEMIZE_MODE:
             if (!itemlabel) {
-                if (FrenchMode)
+                if (FrenchMode || RussianMode)
                     fprintRTF("\\endash\\tab\n");
                 else
                     fprintRTF("\\bullet\\tab\n");
@@ -992,26 +1088,29 @@ void CmdItem(int code)
         case ENUMERATE_MODE:
             if (itemlabel) 
                 break;
-            switch (g_enumerate_depth) {
-                case 1:
-                    fprintRTF("%d.", item_number[g_enumerate_depth]);
-                    break;
+	    if (RussianMode)
+                fprintRTF("%d)", item_number[g_enumerate_depth]);
+	    else
+		switch (g_enumerate_depth) {
+		    case 1:
+			fprintRTF("%d.", item_number[g_enumerate_depth]);
+			break;
 
-                case 2:
-                    fprintRTF("(%c)", 'a' + item_number[g_enumerate_depth] - 1);
-                    break;
+		    case 2:
+			fprintRTF("(%c)", 'a' + item_number[g_enumerate_depth] - 1);
+			break;
 
-                case 3:
-                    fprintRTF("%s.", roman_item(item_number[g_enumerate_depth], FALSE));
-                    break;
+		    case 3:
+			fprintRTF("%s.", roman_item(item_number[g_enumerate_depth], FALSE));
+			break;
 
-                case 4:
-                    fprintRTF("%c.", 'A' + item_number[g_enumerate_depth] - 1);
-                    break;
-                
-                default:
-                    break;
-            }
+		    case 4:
+			fprintRTF("%c.", 'A' + item_number[g_enumerate_depth] - 1);
+			break;
+		    
+		    default:
+			break;
+		}
             if (code != INPARAENUM_MODE)
                 fprintRTF("\\tab\n");
             else
@@ -1488,10 +1587,10 @@ void CmdQuad(int kk)
  ******************************************************************************/
 {
     int z;
-
+ 
     fprintRTF("{");
     for (z = 0; z <= kk; z++)
-        fprintRTF("  ");
+        fprintRTF("\\~");
     fprintRTF("}");
 }
 
@@ -1801,8 +1900,7 @@ void CmdKeywords(int code)
     }
 }
 
-void
-CmdAcknowledgments(int code)
+void CmdAcknowledgments(int code)
 {
     static char     oldalignment;
 
@@ -1826,8 +1924,7 @@ CmdAcknowledgments(int code)
 }
 
 
-void 
-CmdTitlepage(int code)
+void CmdTitlepage(int code)
 /******************************************************************************
   purpose: \begin{titlepage} ... \end{titlepage}
            add pagebreaks before and after this environment
@@ -2287,7 +2384,7 @@ static int NumForColor(char * color)
         n = 92;
     else if (strcmp(color, "PurpleHeart") == 0)
         n = 93;
-    else if (strcmp(color, "PurpleMountains�Majesty") == 0)
+    else if (strcmp(color, "PurpleMountainsÕMajesty") == 0)
         n = 94;
     else if (strcmp(color, "PurplePizzazz") == 0)
         n = 95;

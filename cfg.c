@@ -158,8 +158,8 @@ FILE *open_cfg(const char *name, int quit_on_error)
   ****************************************************************************/
  {
     FILE *fp;
-
-/* try path specified on the line */
+    
+  /* try path specified on the line */
     fp = try_path(g_config_path, name);
     if (fp)
         return fp;
@@ -176,7 +176,7 @@ FILE *open_cfg(const char *name, int quit_on_error)
     fp = open_path(CFGDIR, name, NULL);
     if (NULL != fp) return fp;
  
-/* failed ... give some feedback */
+  /* failed ... give some feedback */
     if (quit_on_error) {
         diagnostics(WARNING, "Cannot open the latex2rtf config file '%s'",name);
         diagnostics(WARNING, "Locate the directory containing the .cfg files and");

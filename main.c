@@ -71,12 +71,13 @@ char *g_ttt_name = NULL;
 char *g_bbl_name = NULL;
 char *g_home_dir = NULL;
 
-char *progname;                 /* name of the executable file */
+char *progname;                /* name of the executable file */
 int SpanishMode = FALSE;       /* support spanishstyle */
 int GermanMode = FALSE;        /* support germanstyle */
 int FrenchMode = FALSE;        /* support frenchstyle */
 int RussianMode = FALSE;       /* support russianstyle */
 int CzechMode = FALSE;         /* support czech */
+int ESKDMode = FALSE;          /* partially support for eskdx package */
 
 int twoside = FALSE;
 int g_verbosity_level = WARNING;
@@ -960,8 +961,10 @@ purpose: opens "g_home_dir/path"  and
     p = fopen(name, mode);
 
     if (p == NULL) {
-        if (strstr(path, ".tex") != NULL)
-            p = (FILE *) open_cfg(path, FALSE);
+        if (strstr(path, ".tex") != NULL) {
+	  name = strdup_together("latex/", path); /* add subdir for latex files *NI*/
+          p = (FILE *) open_cfg(name, FALSE);
+	}
     } else
         diagnostics(2, "Opened '%s'", name);
     

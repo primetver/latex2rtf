@@ -523,7 +523,7 @@ void CmdBibliography(int code)
  ******************************************************************************/
 void CmdThebibliography(int code)
 {
-    int amount = 450;
+    int amount = 600;
     int i;
 
     if (code & ON) {
@@ -583,7 +583,7 @@ void CmdBibitem(int code)
 
     g_processing_list_environment = TRUE;
     CmdEndParagraph(0);
-    startParagraph("bibitem", PARAGRAPH_FIRST);
+    startParagraph("bibitem", PARAGRAPH_LIST); /* keep amount indent */
 
     label = getBracketParam();
     key = getBraceParam();

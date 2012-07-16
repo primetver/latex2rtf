@@ -20,6 +20,7 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
  
 Authors:
     2001-2002 Scott Prahl
+    2012      Nikolay Ishiev for ESKDMode (NI)
 */
 
 #include <stdlib.h>
@@ -542,7 +543,7 @@ static void setDocumentOptions(char *optionlist)
             diagnostics(WARNING, "Trivial support for the ifpdf package");
             ConvertString("\\newif\\ifpdf");
         } else {
-            diagnostics(WARNING, "Package/option '%s' unknown.", option);
+            diagnostics(WARNING, "Package/option '%s' unknown.", option);    
         }
         option = strtok(NULL, ",");
     }
@@ -582,7 +583,12 @@ void CmdDocumentStyle(int code)
 
     else if (strcmp(format, "slides") == 0)
         g_document_type = FORMAT_SLIDES;
-
+    
+    else if (strcmp(format, "eskdtext") == 0) {
+        ESKDMode = TRUE;
+	RussianMode = TRUE;
+	diagnostics(WARNING, "Enter ESKD format mode (added by Nikolay Ishiev). Only partial support for \\documentclass{eskdtext}!");
+    }
     else if (strcmp(format, "apa") == 0) {
         g_document_type = FORMAT_APA;
         g_document_bibstyle = BIBSTYLE_APACITE;
@@ -590,6 +596,16 @@ void CmdDocumentStyle(int code)
         diagnostics(WARNING, "Meager support for \\documentclass{apa}");
     } else
         diagnostics(WARNING, "Document format <%s> unknown, using article format", format);
+    
+    /* Try to include support file for document class *NI*/
+    char *texsource;
+    texsource = strdup_together(format, ".tex");
+    if (PushSource(texsource, NULL) == 0)
+	diagnostics(WARNING, "Include %s class support file...", texsource);
+    else
+	if (ESKDMode == TRUE)
+	  /* support for eskdtext is mantadory *NI*/
+	  diagnostics(ERROR, "Can't include %s class support file, check if it exists in the config path %s/latex/! Giving Up....", texsource, g_config_path);
 
     if (options_with_spaces) {
         options = strdup_noblanks(options_with_spaces);
@@ -598,6 +614,7 @@ void CmdDocumentStyle(int code)
         free(options);
     }
     free(format);
+    free(texsource);
 }
 
 /******************************************************************************
@@ -703,7 +720,14 @@ static void CmdUseOnepackage(char* package, char *options)
     } else if (strcmp(package,"ifpdf") == 0) {
         ConvertString("\\newif\\ifpdf");
     } else {
-        setDocumentOptions(package);
+        /* Try to include support file for package *NI*/
+        char *texsource;
+        texsource = strdup_together(package, ".tex");
+        if (PushSource(texsource, NULL) == 0)
+           diagnostics(WARNING, "Include %s package support file...", texsource);
+        else
+           setDocumentOptions(package);
+	free(texsource);
     }
 }
 
@@ -932,7 +956,7 @@ void CmdTableOfContents(int code)
     startParagraph("Normal", PARAGRAPH_GENERIC);
     CmdVspace(VSPACE_SMALL_SKIP);
     fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-3\" }{\\fldrslt }}\n");  
-    CmdNewPage(NewPage);
+    /* CmdNewPage(NewPage); */
     CmdEndParagraph(0);
 }
 
@@ -964,28 +988,28 @@ void CmdMakeTitle(int code)
     setAlignment(CENTERED);
     
     if (g_preambleTitle != NULL && strcmp(g_preambleTitle, "") != 0) {
-        startParagraph("title", PARAGRAPH_GENERIC);
+        startParagraph("title", PARAGRAPH_FIRST);
         ConvertString(g_preambleTitle);
     }
     
     if (g_preambleAuthor != NULL && strcmp(g_preambleAuthor, "") != 0) {
-        startParagraph("author", PARAGRAPH_GENERIC);
+        startParagraph("author", PARAGRAPH_FIRST);
         ConvertString(g_preambleAuthor);
     }
 
     if (g_preambleAffiliation != NULL && strcmp(g_preambleAffiliation, "") != 0) {
-        startParagraph("author", PARAGRAPH_GENERIC);
+        startParagraph("author", PARAGRAPH_FIRST);
         ConvertString(g_preambleAffiliation);
     }
 
-    startParagraph("author", PARAGRAPH_GENERIC);
+    startParagraph("author", PARAGRAPH_FIRST);
     if (g_preambleDate == NULL || strcmp(g_preambleDate, "") == 0) 
         fprintRTF("\\chdate ");
     else
         ConvertString(g_preambleDate);
 
     if (g_preambleAck != NULL && strcmp(g_preambleAck, "") != 0) {
-        startParagraph("author", PARAGRAPH_GENERIC);
+        startParagraph("author", PARAGRAPH_FIRST);
         ConvertString(g_preambleAck);
     }
 
@@ -1008,6 +1032,7 @@ void CmdMakeTitle(int code)
         startParagraph("Normal", PARAGRAPH_FIRST);
 
     PopTrackLineNumber();
+    CmdNewPage(NewPage); 
 }
 
 void CmdPreambleBeginEnd(int code)
@@ -1596,4 +1621,18 @@ purpose: writes header info for the RTF file
     WriteInfo();
     WriteHeadFoot();
     WritePageSize();
+}
+
+
+
+void CmdESKDtheTitle(int code)
+
+/****************************************************************************
+purpose: writes the title of the document
+
+ ****************************************************************************/
+
+{
+     if (g_preambleTitle != NULL && strcmp(g_preambleTitle, "") != 0)
+           ConvertString(g_preambleTitle);  
 }
