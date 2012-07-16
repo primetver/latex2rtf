@@ -1,0 +1,57 @@
+\documentclass[11pt]{article}
+\begin{document}
+
+\section{Example for paragraphs}
+
+Some roman text
+
+{\tt
+should be typewriter font
+
+should be typewriter font
+}
+
+\section{Example for itemize}
+
+Another example
+
+\begin{itemize}
+\item one roman
+{\tt
+\item two typewriter
+\item three typewriter
+}
+\begin{itemize}
+\item subitem roman
+\item subitem roman
+\end{itemize}
+\end{itemize}
+
+Now a numbered list
+
+\begin{enumerate}
+\item one roman
+{\tt
+\item two typewriter
+\item three typewriter
+}
+\begin{enumerate}
+\item subitem roman
+\item subitem roman
+\end{enumerate}
+\end{enumerate}
+
+\section{Example for sections}
+But sections are impervious!
+
+\subsection{Title is roman}
+Text is in roman.
+
+{\tt
+\subsection{Two in roman}
+Text is in typewriter.
+
+\subsection{Three in roman}
+Text is in typewriter.
+}
+\end{document}
