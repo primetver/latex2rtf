@@ -238,7 +238,7 @@ purpose: converts inputfile and writes result to outputfile
                 } else {
                     cNext = getNonSpace();
 
-                    if (cNext == '\n' && !g_processing_table /*temp! remove it *NI*/) {    /* new paragraph ... skip all ' ' and '\n' some*/
+                    if (cNext == '\n') {    /* new paragraph ... skip all ' ' and '\n' some*/
                         CmdEndParagraph(0);
 
                     } else {    /* add a space if needed */

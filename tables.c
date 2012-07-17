@@ -324,7 +324,7 @@ static TabularT *TabularPreamble(const char *format)
         startParagraph("last", PARAGRAPH_FIRST);
     }
 
-    fprintRTF("\\par\n");
+    /*fprintRTF("\\par\n");*/
     return tabular;
  }
 
@@ -930,7 +930,7 @@ void CmdTabular(int code)
         g_processing_tabular = FALSE;
         return;
     }
-
+    fprintRTF("****tabular***");
     g_processing_tabular = TRUE;
     width = NULL;
     pos = NULL;
@@ -1015,13 +1015,13 @@ void CmdTabular(int code)
     
             diagnostics(4, "Entering CmdTabular() options [%s], format {%s}", (pos) ? pos : "", cols);
             tabular_layout = TabularPreamble(cols);
-            if (0) PrintTabular(tabular_layout);
+            /*if (0)*/ PrintTabular(tabular_layout);
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
             diagnostics(5, "%s",table);
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
     
             /* scan entire table to get max number of chars in each column */
-            /* these are stored in tabular_layout->chars                   */
+            /* these are stored in tabular_layout->chars  */
             
             TabularGetRow(table, &this_row, &next_row_start, &this_height);
             while (this_row) {
