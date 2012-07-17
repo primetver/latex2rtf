@@ -745,9 +745,9 @@ void CmdCaption(int code)
     vspace = getLength("abovecaptionskip");
     setVspace(vspace);
 
-    /* Different styles for figure and table captions */
+    /* Different styles for figure and table captions *NI*/
     if (g_processing_figure) {
-	startParagraph("caption figure", PARAGRAPH_FIRST);
+        startParagraph("caption figure", PARAGRAPH_FIRST);
 	fprintRTF("{");
         incrementCounter("figure");
         ConvertBabelName("FIGURENAME");
@@ -1695,7 +1695,7 @@ void CmdFigure(int code)
             safe_free(label);
             safe_free(caption);
         } else {
-            startParagraph("figure", PARAGRAPH_GENERIC);
+            /*startParagraph("figure", PARAGRAPH_GENERIC); not needed, figure environment is only placeholder *NI*/
             ConvertString(figure_contents);
         }
         free(figure_contents);

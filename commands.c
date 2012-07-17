@@ -702,6 +702,7 @@ static CommandArray spacingCommands[] = {
 /********************************************************************/
 static CommandArray params[] = {
     {"center", CmdAlign, PAR_CENTER},
+    {"centering", CmdAlign, PAR_CENTER},
     {"flushright", CmdAlign, PAR_RIGHT},
     {"flushleft", CmdAlign, PAR_LEFT},
     {"document", Environment, DOCUMENT_MODE},

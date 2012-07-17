@@ -627,7 +627,7 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    fprintRTF("{\\trowd");
+    fprintRTF("***testtesttest***{\\trowd");
 
     cell_start = (char *) this_row;
     column = 0;
@@ -1459,7 +1459,7 @@ void CmdTable(int code)
                 fprintRTF("%d about here]", getCounter("endfloattable"));
             }
         } else {
-            startParagraph("table", PARAGRAPH_GENERIC);
+            /*startParagraph("table", PARAGRAPH_GENERIC);  non needed, table environment is only placeholder *NI*/
             ConvertString(table_contents);
         }
         free(table_contents);
