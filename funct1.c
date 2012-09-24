@@ -62,35 +62,42 @@ static int g_chapter_numbering = ARABIC_NUMBERING;
 static int g_section_numbering = ARABIC_NUMBERING;
 static int g_appendix = 0;
 
-/*
-static RuAlphaArray ru_alpha[] = {
-    {'А', 'а'},
-    {'Б', 'б'},
-    {'В', 'в'},
-    {'Г', 'г'},
-    {'Д', 'д'},
-    {'Е', 'е'},
-    {'Ж', 'ж'},
-    {'И', 'и'},
-    {'К', 'к'},
-    {'Л', 'л'},
-    {'М', 'м'},
-    {'Н', 'н'},
-    {'П', 'п'},
-    {'Р', 'р'},
-    {'С', 'с'},
-    {'Т', 'т'},
-    {'У', 'у'},
-    {'Ф', 'ф'},
-    {'Х', 'х'},
-    {'Ц', 'ц'},
-    {'Ч', 'ч'},
-    {'Ш', 'ш'},
-    {'Щ', 'щ'},
-    {'Э', 'э'},
-    {'Ю', 'ю'},
-    {'Я', 'я'}
-}; */
+/* LaTeX commands for Russin letters:
+  c -- Capital
+  s -- Small letter */
+typedef struct {
+    char *c;
+    char *s;
+} ru_alpha_type;
+
+/* Sequence for Russian alpha numbering */
+static ru_alpha_type ru_alpha[] = {
+    {"\\CYRA",	"\\cyra"},
+    {"\\CYRB",	"\\cyrb"},
+    {"\\CYRV",	"\\cyrv"},
+    {"\\CYRG",	"\\cyrg"},
+    {"\\CYRD",	"\\cyrd"},
+    {"\\CYRE",	"\\cyre"},
+    {"\\CYRZH",	"\\cyrzh"},
+    {"\\CYRI",	"\\cyri"},
+    {"\\CYRK",	"\\cyrk"},
+    {"\\CYRL",	"\\cyrl"},
+    {"\\CYRM",	"\\cyrm"},
+    {"\\CYRN",	"\\cyrn"},
+    {"\\CYRP",	"\\cyrp"},
+    {"\\CYRR",	"\\cyrr"},
+    {"\\CYRS",	"\\cyrs"},
+    {"\\CYRT",	"\\cyrt"},
+    {"\\CYRU",	"\\cyru"},
+    {"\\CYRF",	"\\cyrf"},
+    {"\\CYRH",	"\\cyrh"},
+    {"\\CYRC",	"\\cyrc"},
+    {"\\CYRSH",	"\\cyrch"},
+    {"\\CYRSHCH",	"\\cyrshch"},
+    {"\\CYREREV",	"\\cyrerev"},
+    {"\\CYRYU",	"\\cyryu"},
+    {"\\CYRYA",	"\\cyrya"}
+};
 
 int g_processing_list_environment = FALSE;
 int g_hspace_in_list_environment = 0;
@@ -1088,7 +1095,17 @@ void CmdItem(int code)
         case ENUMERATE_MODE:
             if (itemlabel) 
                 break;
-	    if (RussianMode)
+	    if (ESKDMode && ( g_enumerate_depth == 1 )) {
+		/* Russian letters generation for item number */
+		if (item_number[g_enumerate_depth] > 0 && item_number[g_enumerate_depth] <= 25)
+		  ConvertString(ru_alpha[item_number[g_enumerate_depth] - 1].s);
+		else if (item_number[g_enumerate_depth] > 25)
+		  fprintRTF("%d", item_number[g_enumerate_depth] - 25);
+		else 
+		  fprintRTF("%d", item_number[g_enumerate_depth]);
+		fprintRTF(")");
+	    }
+	    else if (RussianMode)
                 fprintRTF("%d)", item_number[g_enumerate_depth]);
 	    else
 		switch (g_enumerate_depth) {

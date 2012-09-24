@@ -192,8 +192,3 @@ void CmdAppendix(int code);
 void CmdAcronymItem(int code);
 void CmdLap(int code);
 
-/*
-typedef struct rualphatag {
-    char *cap;           	
-    char *str;         		
-} RuAlphaArray; */

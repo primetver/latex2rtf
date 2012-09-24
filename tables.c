@@ -321,7 +321,7 @@ static TabularT *TabularPreamble(const char *format)
 
     if (getTexMode() != MODE_HORIZONTAL) {
         CmdIndent(INDENT_NONE);
-        startParagraph("last", PARAGRAPH_FIRST);
+        startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
     }
 
     /*fprintRTF("\\par\n");*/
@@ -627,7 +627,7 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    fprintRTF("***testtesttest***{\\trowd");
+    fprintRTF("{\\trowd");
 
     cell_start = (char *) this_row;
     column = 0;
@@ -930,7 +930,7 @@ void CmdTabular(int code)
         g_processing_tabular = FALSE;
         return;
     }
-    fprintRTF("****tabular***");
+    
     g_processing_tabular = TRUE;
     width = NULL;
     pos = NULL;
