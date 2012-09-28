@@ -200,7 +200,7 @@ static TabularT *NewTabularFromFormat(const char *format)
             case 'm':
             case 'p':
                 iCol++;
-                table->align[iCol] = 'l';
+                /* table->align[iCol] = 'l'; may be set in other value by case '>' in one step before *NI*/
                 s++;
                 t=getStringBraceParam(&s);
                 if (t) {
@@ -232,7 +232,13 @@ static TabularT *NewTabularFromFormat(const char *format)
             case '>':
                 s++;
                 t=getStringBraceParam(&s);
-                old = table->after[iCol+1];
+		if (strcmp("\\raggedright", t) == 0)
+		  table->align[iCol+1] = 'l';
+		if (strcmp("\\raggedleft", t) == 0)
+		  table->align[iCol+1] = 'r';
+		if (strcmp("\\centering", t) == 0)
+		  table->align[iCol+1] = 'c';
+		old = table->after[iCol+1];
                 if (old) {
                     table->after[iCol+1] = strdup_together(t, old);
                     free(t);
@@ -607,7 +613,7 @@ static char *TabularCline(const char *row, int columns)
     return cline;
 }
 
-static void TabularBeginRow(TabularT *table, const char *this_row, const char *next_row, int first_row)
+static void TabularBeginRow(TabularT *table, const char *this_row, const char *next_row, int first_row, int height)
 
 /******************************************************************************
  purpose:  emit RTF to start one row of a table
@@ -627,8 +633,8 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    fprintRTF("{\\trowd");
-
+    fprintRTF("{\\trowd\\trrh%d", height); /* add height *NI*/
+    
     cell_start = (char *) this_row;
     column = 0;
     cline = TabularCline(next_row, table->n);
@@ -752,7 +758,7 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
         }
     }
 
-    TabularBeginRow(table, this_row, next_row, first_row);
+    TabularBeginRow(table, this_row, next_row, first_row, 0);
     cell_start = (char *) this_row;
     table->i = 0;
     while (cell_start) {
@@ -780,6 +786,21 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
     }
 
     TabularEndRow();
+    
+    /* add extra space after -- empty row with height *NI*/
+    if (height) {
+      TabularBeginRow(table, this_row, next_row, first_row, height);
+      cell_start = (char *) this_row;
+      while (cell_start) {
+	  TabularGetCell(cell_start, &cell, &cell_end);
+	  BeginCellRTF('l');
+	  EndCellRTF();
+	  cell_start = cell_end;
+	  free(cell);
+      }
+      TabularEndRow();
+    }
+      
 }
 
 static int TabularMeasureCell(const char *cell)
@@ -1015,7 +1036,7 @@ void CmdTabular(int code)
     
             diagnostics(4, "Entering CmdTabular() options [%s], format {%s}", (pos) ? pos : "", cols);
             tabular_layout = TabularPreamble(cols);
-            /*if (0)*/ PrintTabular(tabular_layout);
+            /* PrintTabular(tabular_layout); */
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
             diagnostics(5, "%s",table);
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
@@ -1031,7 +1052,7 @@ void CmdTabular(int code)
             }
     
             TabularSetWidths(tabular_layout);
-            if (0) PrintTabular(tabular_layout);
+            /* PrintTabular(tabular_layout); */
             
             TabularGetRow(table, &this_row, &next_row_start, &this_height);
             first_row = TRUE;

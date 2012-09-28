@@ -187,7 +187,13 @@ void changeTexMode(int mode)
     diagnostics(6, "TeX mode changing from [%s] -> [%s]", TexModeName[g_TeX_mode], TexModeName[mode]);
 
     if (g_TeX_mode == MODE_VERTICAL && mode == MODE_HORIZONTAL)
-        startParagraph("Normal", PARAGRAPH_GENERIC);
+      if (g_processing_tabular) { 
+	if (g_par_brace == 1)
+	  CmdEndParagraph(0);
+	g_par_brace++;
+      }
+      else
+	startParagraph("Normal", PARAGRAPH_GENERIC);
 
     if (g_TeX_mode == MODE_HORIZONTAL && mode == MODE_VERTICAL)
         CmdEndParagraph(0);
@@ -653,13 +659,27 @@ void CmdAlign(int code)
         case (PAR_RAGGEDRIGHT):
             old_alignment_before_centerline = getAlignment();
             setAlignment(LEFT);
-
+	    fprintRTF("{");
             diagnostics(4, "Entering Convert from CmdAlign (raggedright)");
             Convert();
             diagnostics(4, "Exiting Convert from CmdAlign (raggedright)");
             setAlignment(old_alignment_before_centerline);
             CmdEndParagraph(0);
-
+	    fprintRTF("}");
+            break;
+	    
+	case (PAR_RAGGEDLEFT): /* new added *NI*/
+	    if (g_processing_tabular || g_processing_tabbing)
+	       break;
+	    old_alignment_before_centerline = getAlignment();
+            setAlignment(RIGHT);
+	    fprintRTF("{");
+            diagnostics(4, "Entering Convert from CmdAlign (raggedleft)");
+            Convert();
+            diagnostics(4, "Exiting Convert from CmdAlign (raggedleft)");
+            setAlignment(old_alignment_before_centerline);
+            CmdEndParagraph(0);
+	    fprintRTF("}");
             break;
 
         case (PAR_CENTER | ON):
@@ -692,6 +712,7 @@ void CmdAlign(int code)
             setAlignment(old_alignment_before_left);
             CmdIndent(INDENT_INHIBIT);
             break;
+	    
         case (PAR_CENTERING):
             CmdIndent(INDENT_NONE);
             old_alignment_before_center = getAlignment();

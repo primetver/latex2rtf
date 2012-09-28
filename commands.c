@@ -136,6 +136,7 @@ static CommandArray commands[] = {
     {"textfont", CmdTextFont, 0},
     {"the", CmdThe, 0},
 
+    {"raggedleft", CmdAlign, PAR_RAGGEDLEFT}, /* new *NI*/
     {"raggedright", CmdAlign, PAR_RAGGEDRIGHT},
     {"centerline", CmdAlign, PAR_CENTERLINE},
     {"vcenter", CmdAlign, PAR_VCENTER},
