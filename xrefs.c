@@ -789,8 +789,9 @@ void CmdLabel(int code)
                 fprintRTF("(");
                 
             if (fields_use_REF()) {
-                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* MERGEFORMAT }}", signet);
-                fprintRTF("{\\fldrslt{");
+                /*fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* MERGEFORMAT }}", signet);*/
+		fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* CHARFORMAT}}", signet);
+		fprintRTF("{\\fldrslt{");
             }
             
             if (s)
