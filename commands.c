@@ -412,6 +412,7 @@ static CommandArray PreambleCommands[] = {
     {"thepage", CmdThePage, 0},
     {"hyphenation", CmdHyphenation, 0},
     {"def", CmdNewDef, DEF_DEF},
+    {"gdef", CmdNewDef, DEF_DEF},
     {"newcommand", CmdNewDef, DEF_NEW},
     {"providecommand", CmdNewDef, DEF_NEW},
     {"DeclareRobustCommand", CmdNewDef, DEF_NEW},
@@ -489,6 +490,7 @@ static CommandArray PreambleCommands[] = {
     {"docnumber", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"graphicspath",  CmdGraphicsPath, 0 },
     {"ESKDtheTitle",  CmdESKDtheTitle, 0 },
+    {"ESKDtotal",  CmdESKDtotal, 0 },
     {"", NULL, 0}
 };                              /* end of list */
 

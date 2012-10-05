@@ -43,6 +43,10 @@ char *acronymAux[] = {
     "\\newacroplural",
     "\\harvardcite",
     "\\bibcite",
+    "\\gdef\\ESKD@total@saved@figure",
+    "\\gdef\\ESKD@total@saved@table",
+    "\\gdef\\ESKD@total@saved@bibitem",
+    "\\gdef\\ESKD@total@saved@appendix",
     NULL
 };
 

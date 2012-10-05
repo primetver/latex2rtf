@@ -2531,3 +2531,26 @@ void CmdLap(int code)
     ConvertString(s);
     free(s);
 }
+
+
+
+/****************************************************************************
+purpose: writes the \ESKDtotal saved values
+ ****************************************************************************/
+void CmdESKDtotal(int code)
+{
+    char *s = getBraceParam();
+    
+    if (strcmp("page", s) == 0) {
+      /* special case for numpages - use RTF field */
+      fprintRTF("{\\field{\\*\\fldinst{\\lang1024 NUMPAGES \\\\* CHARFORMAT}}{\\fldrslt{?}}}");
+    } 
+    else {
+      LoadAuxFile(); /* load saved values */
+      char* cmd;
+      cmd = strdup_together("\\ESKD@total@saved@", s);
+      ConvertString(cmd);
+      free(cmd);
+    }
+    free(s);
+}

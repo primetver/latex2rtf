@@ -771,9 +771,9 @@ returns: success or not
     }
 
 
-    /* Commands consist of letters and can have an optional * at the end */
+    /* Commands consist of letters, can have @ and an optional * at the end */
     for (i = 0; i < MAXCOMMANDLEN-1; i++) {
-        if (!isalpha((int) cThis) && (cThis != '*')) {
+        if (!isalpha((int) cThis) && (cThis != '*') && (cThis != '@')) {
             int found_nl = FALSE;
 
             if (cThis == '%') { /* put the % back and get the next char */

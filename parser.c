@@ -806,7 +806,8 @@ char *getSimpleCommand(void)
     for (size = 2; size < 127; size++) {
         buffer[size] = getRawTexChar(); /* \t \r '%' all end command */
 
-        if (!isalpha((int) buffer[size])) {
+	/* Commands consist of letters, can have @ and an optional * at the end */
+        if (!isalpha((int) buffer[size]) && (buffer[size] != '*') && (buffer[size] != '@')) { 
             ungetTexChar(buffer[size]);
             break;
         }
