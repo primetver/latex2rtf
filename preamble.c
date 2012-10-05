@@ -84,6 +84,7 @@ static void WriteStyleHeader(void);
 static void WritePageSize(void);
 void ParseOptGeometry(char *options);
 void ExecGeomOptions (char *option, char *value1, char *value2);
+void correct_lengths(void);
 
 void setPackageBabel(char *option)
 {
@@ -863,7 +864,37 @@ void ExecGeomOptions (char *key, char *value1, char *value2)
         ExecGeomOptions ("vmarginratio", "1", "1");
         ExecGeomOptions ("hmarginratio", "1", "1");
     }
+    correct_lengths();
+}
 
+void correct_lengths(void)
+{
+  int page_w, page_h;
+  page_w = getLength("pagewidth");
+  page_h = getLength("pageheight");
+  
+  if (page_w) {
+    setLength("textwidth", page_w - g_geomMargl - g_geomMargr);
+    setLength("linewidth", page_w - g_geomMargl - g_geomMargr);
+    setLength("columnwidth", page_w - g_geomMargl - g_geomMargr);
+  }
+  
+  if (page_h) {
+    setLength("textheight", page_h - g_geomMargt - g_geomMargb);  
+  }
+
+ /* need bo be tested and added ? 
+        setLength("hoffset", 0 * 20);
+        setThree("oddsidemargin", 53, 46, 31);
+        setLength("headheight", 12 * 20);
+        setLength("footskip", 30 * 20);
+        setLength("marginparpush", 5 * 20);
+        setLength("voffset", 0 * 20);
+        setLength("topmargin", 17 * 20);
+        setLength("headsep", 25 * 20);
+        setLength("marginparsep", 10 * 20);
+        setLength("columnsep", 10 * 20);
+ */
 }
 
 /******************************************************************************
