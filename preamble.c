@@ -387,6 +387,11 @@ static void setPaperSize(char *option)
         setLength("marginparsep", 10 * 20);
         setLength("columnsep", 10 * 20);
     }
+    
+    /* set other deafults for RTF conversion */
+    setCounter("RTFtrgaph", 90);
+    setCounter("RTFheadrows", 1);
+    setCounter("RTFtrkeep", 1);
 }
 
 static void setPointSize(char *option)

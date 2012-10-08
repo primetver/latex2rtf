@@ -613,7 +613,7 @@ static char *TabularCline(const char *row, int columns)
     return cline;
 }
 
-static void TabularBeginRow(TabularT *table, const char *this_row, const char *next_row, int first_row, int height)
+static void TabularBeginRow(TabularT *table, const char *this_row, const char *next_row, int first_row, int height, int headrow)
 
 /******************************************************************************
  purpose:  emit RTF to start one row of a table
@@ -633,8 +633,17 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    fprintRTF("{\\trowd\\trrh%d", height); /* add height *NI*/
+    int trgaph;
+    trgaph = getCounter("RTFtrgaph"); /* may be adjusted, default 90 twips */
+
+    fprintRTF("{\\trowd\\trrh%d\\trgaph%d", height, trgaph); /* add \trrh and \trgaph *NI*/
     
+    if (headrow)
+       fprintRTF("\\trhdr"); /* head row repeat on every page */
+   
+    if (getCounter("RTFtrkeep") > 0)
+       fprintRTF("\\trkeep"); /* keep row together (default set to 1) */
+       
     cell_start = (char *) this_row;
     column = 0;
     cline = TabularCline(next_row, table->n);
@@ -736,13 +745,14 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
 {
     char *cell, *cell_start, *cell_end;
     char align;
-    int n, lvert, rvert;
-
+    int n, lvert, rvert, headrows;
+    static int row_num = 1;
+    
     if (this_row == NULL || strlen(this_row) == 0)
         return;
 
     diagnostics(5, "TabularWriteRow height=%d twpi, row <%s>", height, this_row);
-
+    
     /* avoid writing anything for empty last row */
     if (next_row == NULL) {
         /* do nothing if the row is empty */
@@ -757,8 +767,14 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
             if (n==0) return;
         }
     }
-
-    TabularBeginRow(table, this_row, next_row, first_row, 0);
+    
+    if (first_row == TRUE)
+      row_num = 1;
+    else
+      row_num++;
+    headrows = getCounter("RTFheadrows");
+    
+    TabularBeginRow(table, this_row, next_row, first_row, 0, (row_num <= headrows));
     cell_start = (char *) this_row;
     table->i = 0;
     while (cell_start) {
@@ -772,7 +788,10 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
             n = 1;
         }
 
-        BeginCellRTF(align);
+        if (row_num <= headrows && ESKDMode) /* force centering for headrows in ESKDMode */
+	    BeginCellRTF('c');	
+	  else
+	    BeginCellRTF(align);
         if (cell != NULL) {
             fprintRTF("{");
             ConvertString(cell);
@@ -789,7 +808,7 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
     
     /* add extra space after -- empty row with height *NI*/
     if (height) {
-      TabularBeginRow(table, this_row, next_row, first_row, height);
+      TabularBeginRow(table, this_row, next_row, first_row, height, FALSE);
       cell_start = (char *) this_row;
       while (cell_start) {
 	  TabularGetCell(cell_start, &cell, &cell_end);
