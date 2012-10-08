@@ -258,6 +258,7 @@ void startParagraph(const char *style, int indenting)
     static char the_style[50] = "Normal";
     static int last_indent = 0;
     static int next_paragraph_after_section = TRUE;
+    static int next_no_vskip = TRUE;
     
     int orig_font_family = CurrentFontFamily();
     int orig_font_size = CurrentFontSize();
@@ -388,8 +389,14 @@ void startParagraph(const char *style, int indenting)
         
     fprintRTF("\\sl%i\\slmult1 ", getLineSpacing());
 
-    if (getVspace() > 0)
-        fprintRTF("\\sb%d ", getVspace());
+    if (next_no_vskip == TRUE)
+	/* redefine style - use zero extra space after section titles */
+	fprintRTF("\\sb0 "); 
+    else {
+	if (getVspace() > 0)
+	    /* redefine style - use Vspase value */
+	    fprintRTF("\\sb%d ", getVspace());
+    }
     setVspace(parskip);
 
     if (g_left_margin_indent != 0)
@@ -398,7 +405,7 @@ void startParagraph(const char *style, int indenting)
     if (g_right_margin_indent != 0)
         fprintRTF("\\ri%d", g_right_margin_indent);
 
-    fprintRTF("\\fi%d ", parindent);  /* what about style \\fi ? */
+    fprintRTF("\\fi%d ", parindent);  /* what about style \\fi ? TEST*/
     
     /* these are strstr because might end in 0 */
     if (strstr("part",the_style)    == NULL && 
@@ -431,8 +438,13 @@ void startParagraph(const char *style, int indenting)
      
     if (indenting == PARAGRAPH_SECTION_TITLE && !FrenchMode && !RussianMode)
     	next_paragraph_after_section = TRUE;
-    else
+    else 
     	next_paragraph_after_section = FALSE;
+    
+    if (indenting == PARAGRAPH_SECTION_TITLE)
+    	next_no_vskip = TRUE;
+    else 
+    	next_no_vskip = FALSE;
 
 }
 

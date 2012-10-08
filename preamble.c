@@ -527,6 +527,7 @@ static void setDocumentOptions(char *optionlist)
                    strcmp(option, "epsf"        ) == 0 ||
                    strcmp(option, "psfig"       ) == 0 ||
                    strcmp(option, "verbatim"    ) == 0 ||
+                   strcmp(option, "eskdtotal"   ) == 0 ||
                    strcmp(option, "paralist"    ) == 0 ) {
             diagnostics(WARNING, "Incomplete support for package/option '%s' ", option);
 
