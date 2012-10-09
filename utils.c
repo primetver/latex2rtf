@@ -380,7 +380,7 @@ void str_delete(char *s, const char *target)
  ******************************************************************************/
 char *ExtractLabelTag(const char *text)
 {
-    char *s, *label_with_spaces, *label;
+    char *s, /* *label_with_spaces, */ *label;
 
     s = strstr(text, "\\label{");
     if (!s)
@@ -390,10 +390,11 @@ char *ExtractLabelTag(const char *text)
 
     s += strlen("\\label");
     PushSource(NULL, s);
-    label_with_spaces = getBraceParam();
+    /* label_with_spaces = getBraceParam(); badchars allowed *NI*/
+    label = getBraceParam();
     PopSource();
-    label = strdup_nobadchars(label_with_spaces);
-    free(label_with_spaces);
+    /* label = strdup_nobadchars(label_with_spaces);
+    free(label_with_spaces); */
 
     diagnostics(4, "LabelTag = <%s>", (label) ? label : "missing");
     return label;
@@ -772,3 +773,4 @@ char * my_fgets(char *buffer, int maxBuffer, FILE *f)
     buffer[i] = '\0';
     return buffer;
 }
+

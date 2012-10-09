@@ -57,6 +57,7 @@ static int g_warned_once = FALSE;
 
 #define MAX_LABELS 200
 #define MAX_CITATIONS 1000
+#define MAX_SIGNETS 5000
 #define BIB_STYLE_ALPHA  0
 #define BIB_STYLE_SUPER  1
 #define BIB_STYLE_NUMBER 2
@@ -73,7 +74,7 @@ typedef struct citekey_type {
     int number;
 } citekey_type;
 
-
+static char *g_all_signets[MAX_SIGNETS];
 static char *g_all_citations[MAX_CITATIONS];
 static int g_last_citation = 0;
 static int g_current_cite_type = 0;
@@ -156,6 +157,36 @@ void set_sorted_citations(void)
 void set_compressed_citations(void)
 {
     g_compressed_citations = TRUE;
+}
+
+static char *make_signet(const char *s)
+{
+    static int signet_count = 0;
+    char *signet;
+    int i = 0;
+    
+    signet = malloc(40);
+    if (signet == NULL)
+	diagnostics(ERROR, "cannot alocate memory in make_signet()");
+
+    while (i < signet_count && strcmp(g_all_signets[i], s) != 0)
+        i++;
+
+    if (i == MAX_SIGNETS) {
+	diagnostics(WARNING, "Maximum of rtf field labels reached, sorry. Some refs will incorrect! Increase MAX_SIGNETS and recompile convertor.");
+	sprintf(signet, "MAX_SIGNETS");
+    }
+    else {
+	if (i == signet_count) {
+	    /* not found, add new */
+	    g_all_signets[signet_count] = strdup(s);
+	    signet_count++;
+	}
+	  
+	sprintf(signet, "%04d", i);
+    }
+        
+    return signet;
 }
 
 /*************************************************************************
@@ -587,7 +618,8 @@ void CmdBibitem(int code)
 
     label = getBracketParam();
     key = getBraceParam();
-    signet = strdup_nobadchars(key);
+    /*signet = (key);*/
+    signet = make_signet(key);
     s = ScanAux(BIBCITE_TOKEN, key, SCANAUX_NUMBER);
 
     if (label && !s) {          /* happens when file needs to be latex'ed again */
@@ -725,7 +757,9 @@ void InsertBookmark(char *name, char *text)
         fprintRTF("%s", text);
         return;
     }
-    signet = strdup_nobadchars(name);
+    
+    /*signet = strdup_nobadchars(name);*/
+    signet = make_signet(name);
 
     if (ExistsBookmark(signet)) {
         diagnostics(4, "bookmark %s already exists", signet);
@@ -734,10 +768,10 @@ void InsertBookmark(char *name, char *text)
         diagnostics(4, "bookmark %s being inserted around <%s>", signet, text);
         RecordBookmark(signet);
         if (fields_use_REF())
-            fprintRTF("{\\*\\bkmkstart BM%s}", signet);
+            fprintRTF("{\\*\\bkmkstart BM_%s}", signet);
         fprintRTF("%s", text);
         if (fields_use_REF())
-            fprintRTF("{\\*\\bkmkend BM%s}", signet);
+            fprintRTF("{\\*\\bkmkend BM_%s}", signet);
     }
 
     safe_free(signet);
@@ -783,14 +817,15 @@ void CmdLabel(int code)
         case LABEL_REF:
         case LABEL_EQREF:
         case LABEL_VREF:
-            signet = strdup_nobadchars(text);
+            /*signet = strdup_nobadchars(text);*/
+	    signet = make_signet(text);
             s = ScanAux(NEWLABEL_TOKEN, text, SCANAUX_SECT);
             if (code == LABEL_EQREF)
                 fprintRTF("(");
                 
             if (fields_use_REF()) {
                 /*fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* MERGEFORMAT }}", signet);*/
-		fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* CHARFORMAT}}", signet);
+		fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM_%s \\\\* CHARFORMAT}}", signet);
 		fprintRTF("{\\fldrslt{");
             }
             
@@ -808,7 +843,7 @@ void CmdLabel(int code)
             if (code == LABEL_VREF) {
                 fprintRTF(" ");
                 if (fields_use_REF()) {
-                    fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM%s \\\\p }}", signet);
+                    fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM_%s \\\\p }}", signet);
                     fprintRTF("{\\fldrslt{");
                 }
                 fprintRTF("%s", signet);
@@ -823,9 +858,10 @@ void CmdLabel(int code)
 
         case LABEL_HYPERPAGEREF:
         case LABEL_PAGEREF:
-            signet = strdup_nobadchars(text);
+            /*signet = strdup_nobadchars(text);*/
+	    signet = make_signet(text);
             if (fields_use_REF()) {
-                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM%s \\\\* MERGEFORMAT }}", signet);
+                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM_%s \\\\* MERGEFORMAT }}", signet);
                 fprintRTF("{\\fldrslt{");
             }
             fprintRTF("%s", signet);
@@ -835,7 +871,8 @@ void CmdLabel(int code)
             break;
 
         case LABEL_NAMEREF:
-            signet = strdup_nobadchars(text);
+            /*signet = strdup_nobadchars(text);*/
+	    signet = make_signet(text);
             s = ScanAux(NEWLABEL_TOKEN, text, SCANAUX_NUMBER);
             if (s) {
                 /* s should look like {2}{1}{Random Stuff\relax }{section.2}{} */
@@ -1565,7 +1602,8 @@ void CmdCite(int code)
         }
         
         if (g_document_bibstyle == BIBSTYLE_STANDARD) {
-            char *signet = strdup_nobadchars(key);
+            /*char *signet = strdup_nobadchars(key);*/
+	    char* signet = make_signet(key);
 
             if (!first_key) {
                 ConvertString(g_bibpunct_cite_sep);
