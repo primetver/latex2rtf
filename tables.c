@@ -317,23 +317,6 @@ static int TabularColumnPosition(TabularT *table, int n)
     return (int) colWidth;
 }
 
-static TabularT *TabularPreamble(const char *format)
-
-/******************************************************************************
- purpose:  analyze the format and create and fill a TabularT structure 
- ******************************************************************************/
-{
-    TabularT *tabular = NewTabularFromFormat(format);
-
-    if (getTexMode() != MODE_HORIZONTAL) {
-        CmdIndent(INDENT_NONE);
-        startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
-    }
-
-    /*fprintRTF("\\par\n");*/
-    return tabular;
- }
-
 static void TabularGetRow(const char *tabular_text, char **row, char **next_row, int *height)
 
 /******************************************************************************
@@ -788,12 +771,14 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
             n = 1;
         }
 
-        if (row_num <= headrows && ESKDMode) /* force centering for headrows in ESKDMode */
+        if (row_num <= headrows && ESKDMode) /* force centering for head rows in ESKDMode */
 	    BeginCellRTF('c');	
 	  else
 	    BeginCellRTF(align);
         if (cell != NULL) {
             fprintRTF("{");
+	    if (row_num <= headrows && ESKDMode)
+	      fprintRTF("\\b "); /* force bold for head rows in ESKDMode */
             ConvertString(cell);
             fprintRTF("}");
         }
@@ -968,7 +953,8 @@ void CmdTabular(int code)
     if (!(code & ON)) {
         diagnostics(4, "Exiting CmdTabular");
         g_processing_tabular = FALSE;
-        return;
+	CmdEndParagraph(0); /* added *NI*/
+	return;
     }
     
     g_processing_tabular = TRUE;
@@ -1054,7 +1040,13 @@ void CmdTabular(int code)
         } else {
     
             diagnostics(4, "Entering CmdTabular() options [%s], format {%s}", (pos) ? pos : "", cols);
-            tabular_layout = TabularPreamble(cols);
+	    tabular_layout = NewTabularFromFormat(cols);
+
+	    if (getTexMode() != MODE_HORIZONTAL) {
+		CmdIndent(INDENT_NONE);
+		startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
+	    }
+  
             /* PrintTabular(tabular_layout); */
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
             diagnostics(5, "%s",table);
@@ -1499,8 +1491,8 @@ void CmdTable(int code)
                 fprintRTF("%d about here]", getCounter("endfloattable"));
             }
         } else {
-            /*startParagraph("table", PARAGRAPH_GENERIC);  non needed, table environment is only placeholder *NI*/
-            ConvertString(table_contents);
+            /* startParagraph("table", PARAGRAPH_GENERIC);  removed *NI*/
+	    ConvertString(table_contents);
         }
         free(table_contents);
         
@@ -1510,10 +1502,10 @@ void CmdTable(int code)
             ConvertString("\\end{table*}");
     } else {
         g_processing_table = FALSE;
-        CmdEndParagraph(0);
+	CmdEndParagraph(0);
         safe_free(g_table_label);
         setAlignment(oldalignment);
-        CmdVspace(VSPACE_BIG_SKIP);
+        CmdVspace(VSPACE_MEDIUM_SKIP);
     }
 }
 
