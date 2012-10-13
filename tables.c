@@ -232,12 +232,16 @@ static TabularT *NewTabularFromFormat(const char *format)
             case '>':
                 s++;
                 t=getStringBraceParam(&s);
+		/* remove align commands */
 		if (strcmp("\\raggedright", t) == 0)
 		  table->align[iCol+1] = 'l';
+		  break;
 		if (strcmp("\\raggedleft", t) == 0)
 		  table->align[iCol+1] = 'r';
+		  break;
 		if (strcmp("\\centering", t) == 0)
 		  table->align[iCol+1] = 'c';
+		  break;
 		old = table->after[iCol+1];
                 if (old) {
                     table->after[iCol+1] = strdup_together(t, old);
@@ -252,7 +256,7 @@ static TabularT *NewTabularFromFormat(const char *format)
                 if (!warned_once) diagnostics(WARNING, " '@{decl.}' and !{decl.} not supported.");
                 s++;
                 t=getStringBraceParam(&s);
-                free(t);
+                safe_free(t);
                 warned_once = TRUE;
                 break;
             case '|':
@@ -1041,13 +1045,38 @@ void CmdTabular(int code)
     
             diagnostics(4, "Entering CmdTabular() options [%s], format {%s}", (pos) ? pos : "", cols);
 	    tabular_layout = NewTabularFromFormat(cols);
+	    
+	    /* For longtable extract caption and label, process caption before processing rows */
+	    if (true_code == TABULAR_LONG || true_code == TABULAR_LONG_STAR) {
+		g_table_label = ExtractLabelTag(table);
+		char *caption, *label, *endfirsthead, *endhead;
+
+		caption = ExtractAndRemoveTag("\\caption", table);
+		label = ExtractAndRemoveTag("\\label", table);
+		ConvertString(caption);
+		
+		safe_free(caption);
+		safe_free(label);
+		
+		endfirsthead = strstr(table, "\\endfirsthead");
+		endhead = strstr(table, "\\endhead");
+		
+		if (endhead) {
+		    /* remove head row, only firsthead row will convert */
+		    char *p = endfirsthead;
+		    while (p < endfirsthead) {
+		      *p = ' ';
+		      p++;
+		    }
+		}
+	    }
 
 	    if (getTexMode() != MODE_HORIZONTAL) {
 		CmdIndent(INDENT_NONE);
 		startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
 	    }
   
-            /* PrintTabular(tabular_layout); */
+	    /* PrintTabular(tabular_layout); */
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
             diagnostics(5, "%s",table);
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
@@ -1089,8 +1118,7 @@ void CmdTabular(int code)
     }
 
     ConvertString(end);
-    
-    
+   
     free(table);
     free(end);
     free(begin);

@@ -805,6 +805,7 @@ void CmdLabel(int code)
     switch (code) {
         case LABEL_LABEL:
             if (g_processing_figure || g_processing_table)
+	        /* already inserted while processing \caption */
                 break;
             if (mode == MODE_DISPLAYMATH) {
                 g_equation_label = strdup_nobadchars(text);
