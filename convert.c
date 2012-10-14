@@ -782,7 +782,7 @@ returns: success or not
             }
 
             /* all spaces after commands are ignored, a single \n may occur */
-            while (cThis == ' ' || (0 && cThis == '\n' && !found_nl)) {
+            while (cThis == ' ' || (cThis == '\n' && !found_nl)) {
                 if (cThis == '\n')
                     found_nl = TRUE;
                 cThis = getTexChar();
