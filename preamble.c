@@ -387,11 +387,6 @@ static void setPaperSize(char *option)
         setLength("marginparsep", 10 * 20);
         setLength("columnsep", 10 * 20);
     }
-    
-    /* set other deafults for RTF conversion */
-    setCounter("RTFtrgaph", 90);
-    setCounter("RTFheadrows", 1);
-    setCounter("RTFtrkeep", 1);
 }
 
 static void setPointSize(char *option)
@@ -604,6 +599,11 @@ void CmdDocumentStyle(int code)
     } else
         diagnostics(WARNING, "Document format <%s> unknown, using article format", format);
     
+    /* Set up deafults for RTF conversion */
+    setCounter("RTFtrgaph", 90);
+    setCounter("RTFheadrows", 1);
+    setCounter("RTFtrkeep", 1);
+    
     /* Try to include support file for document class *NI*/
     char *texsource;
     texsource = strdup_together(format, ".tex");
@@ -613,7 +613,7 @@ void CmdDocumentStyle(int code)
 	if (ESKDMode == TRUE)
 	  /* support for eskdtext is mantadory *NI*/
 	  diagnostics(ERROR, "Can't include %s class support file, check if it exists in the config path %s/latex/! Giving Up....", texsource, g_config_path);
-
+    
     if (options_with_spaces) {
         options = strdup_noblanks(options_with_spaces);
         free(options_with_spaces);

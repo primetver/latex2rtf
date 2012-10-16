@@ -174,7 +174,7 @@ static char *make_signet(const char *s)
 
     if (i == MAX_SIGNETS) {
 	diagnostics(WARNING, "Maximum of rtf field labels reached, sorry. Some refs will incorrect! Increase MAX_SIGNETS and recompile convertor.");
-	sprintf(signet, "MAX_SIGNETS");
+	snprintf(signet, 40, "MAX_SIGNETS");
     }
     else {
 	if (i == signet_count) {
@@ -183,7 +183,7 @@ static char *make_signet(const char *s)
 	    signet_count++;
 	}
 	  
-	sprintf(signet, "%04d", i);
+	snprintf(signet, 40, "%04d", i);
     }
         
     return signet;

@@ -622,7 +622,7 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
 
     int trgaph;
     trgaph = getCounter("RTFtrgaph"); /* may be adjusted, default 90 twips */
-
+    
     fprintRTF("{\\trowd\\trrh%d\\trgaph%d", height, trgaph); /* add \trrh and \trgaph *NI*/
     
     if (headrow)
@@ -945,7 +945,7 @@ void CmdTabular(int code)
             \begin{array}[pos]{cols}            ... \end{array}
  ******************************************************************************/
 {
-    int true_code, this_height, first_row, begins, ends;
+    int true_code, this_height, first_row, begins, ends, saved_headrows;
     char *end=NULL, *begin=NULL, *this_row, *next_row_start;
     char *table = NULL;
     char *cols = NULL;
@@ -1044,43 +1044,81 @@ void CmdTabular(int code)
         } else {
     
             diagnostics(4, "Entering CmdTabular() options [%s], format {%s}", (pos) ? pos : "", cols);
-	    tabular_layout = NewTabularFromFormat(cols);
-	    
-	    /* For longtable extract caption and label, process caption before processing rows */
-	    if (true_code == TABULAR_LONG || true_code == TABULAR_LONG_STAR) {
-		g_table_label = ExtractLabelTag(table);
-		char *caption, *label, *endfirsthead, *endhead;
+            tabular_layout = NewTabularFromFormat(cols);
 
-		caption = ExtractAndRemoveTag("\\caption", table);
-		label = ExtractAndRemoveTag("\\label", table);
-		ConvertString(caption);
-		
-		safe_free(caption);
-		safe_free(label);
-		
-		endfirsthead = strstr(table, "\\endfirsthead");
-		endhead = strstr(table, "\\endhead");
-		
-		if (endhead) {
-		    /* remove head row, only firsthead row will convert */
-		    char *p = endfirsthead;
-		    while (p < endfirsthead) {
-		      *p = ' ';
-		      p++;
-		    }
-		}
-	    }
+            /* save setting for possible changes in longtable processing */
+            saved_headrows = getCounter("RTFheadrows");
 
-	    if (getTexMode() != MODE_HORIZONTAL) {
-		CmdIndent(INDENT_NONE);
-		startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
-	    }
-  
-	    /* PrintTabular(tabular_layout); */
+            /* For longtable extract caption and label, process caption before processing rows */
+            if (true_code == TABULAR_LONG || true_code == TABULAR_LONG_STAR) {
+                g_table_label = ExtractLabelTag(table);
+                char *caption, *label, *endfirsthead, *endhead, *nl, *p;
+
+                caption = ExtractAndRemoveTag("\\caption", table);
+                label = ExtractAndRemoveTag("\\label", table);
+                ConvertString(caption);
+
+                safe_free(caption);
+                safe_free(label);
+
+                nl = strstr(table, "\\tabularnewline");
+                /* remove \tabularnewline before first row */
+                if (nl && (*(nl-1) == '\n' || *(nl-1) == ' ')) {
+                    p = nl;
+                    while (p < nl+15)
+                        *p++ = ' ';
+                }
+
+                nl = strstr(table, "\\\\");
+                /* remove \\ before first row */
+                if (nl && (*(nl-1) == '\n' || *(nl-1) == ' ')) {
+                    p = nl;
+                    while (p < nl+2)
+                        *p++ = ' ';
+                }
+
+                endfirsthead = strstr(table, "\\endfirsthead");
+                endhead = strstr(table, "\\endhead");
+                /* remove head row, only firsthead rows will convert */
+                if (endhead && endfirsthead) {
+                    p = endfirsthead;
+                    while (p < endhead)
+                        *p++ = ' ';
+                }
+
+                /* count true rows in table head and set counter value for RTFheadrows*/
+                if (endhead) {
+                    int headrows = 0;
+                    p = table;
+                    while (p < endhead) {
+                        nl = strstr(p, "\\tabularnewline");
+                        if (nl && nl < endhead) {
+                            p = nl+15;
+                            headrows++;
+                            continue;
+                        }
+                        nl = strstr(p, "\\\\");
+                        if (nl && nl < endhead) {
+                            p = nl+2;
+                            headrows++;
+                            continue;
+                        }
+                        break;
+                    }
+                    setCounter("RTFheadrows", headrows);
+                }
+            }
+
+            if (getTexMode() != MODE_HORIZONTAL) {
+                CmdIndent(INDENT_NONE);
+                startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
+            }
+
+            /* PrintTabular(tabular_layout); */
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
             diagnostics(5, "%s",table);
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
-    
+
             /* scan entire table to get max number of chars in each column */
             /* these are stored in tabular_layout->chars  */
             
@@ -1104,6 +1142,9 @@ void CmdTabular(int code)
                 this_row = next_row;
                 first_row = FALSE;
             }
+
+            /* restore setting */
+            setCounter("RTFheadrows", saved_headrows);
     
             /* free before and after strings */
             if (cols)

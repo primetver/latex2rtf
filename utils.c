@@ -473,12 +473,12 @@ char *getStringBraceParam(char **s)
 
 
 /******************************************************************************
-  purpose: remove 'tag{contents}' from text and return contents
+  purpose: remove 'tag{contents}' from text and return tag{contents}
            note that tag should typically be "\\caption"
  ******************************************************************************/
 char *ExtractAndRemoveTag(char *tag, char *text)
 {
-    char *s, *contents, *start=NULL;
+    char *s, *contents, *res, *start=NULL;
 
     if (text==NULL || *text=='\0') return NULL;
     
@@ -486,7 +486,7 @@ char *ExtractAndRemoveTag(char *tag, char *text)
     diagnostics(5, "target tag = <%s>", tag);
     diagnostics(5, "original text = <%s>", text);
 
-    while (s) {                 /* find start of caption */
+    while (s) {                 /* find start of tag */
         start = strstr(s, tag);
         if (!start)
             return NULL;
@@ -506,8 +506,11 @@ char *ExtractAndRemoveTag(char *tag, char *text)
 
     diagnostics(5, "final contents = <%s>", contents);
     diagnostics(5, "final text = <%s>", text);
+    
+    res = strdup_together4(tag, "{", contents, "}");
+    safe_free(contents);
 
-    return contents;
+    return res;
 }
 
 /* this extracts a comma-delimited, key-value pair from the string s
