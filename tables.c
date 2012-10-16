@@ -617,16 +617,13 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    int trgaph;
-    trgaph = getCounter("RTFtrgaph"); /* may be adjusted, default 90 twips */
-    
-    fprintRTF("{\\trowd\\trrh%d\\trgaph%d", height, trgaph); /* add \trrh and \trgaph *NI*/
+    fprintRTF("{\\trowd\\trrh%d\\trgaph%d", height, getCounter("RTFtrgaph")); /* add \trrh and \trgaph */
     
     if (headrow)
-       fprintRTF("\\trhdr"); /* head row repeat on every page */
+       fprintRTF("\\trhdr\\clvertalc");  /* head row repeat on every page, vertical centering */
    
     if (getCounter("RTFtrkeep") > 0)
-       fprintRTF("\\trkeep"); /* keep row together (default set to 1) */
+       fprintRTF("\\trkeep");            /* keep row together (default set to 1) */
        
     cell_start = (char *) this_row;
     column = 0;
