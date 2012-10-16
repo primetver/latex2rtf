@@ -204,7 +204,7 @@ static TabularT *NewTabularFromFormat(const char *format)
                 s++;
                 t=getStringBraceParam(&s);
                 if (t) {
-                    table->width[iCol] = getStringDimension(t);
+                    table->width[iCol] = getStringDimension(t) + (getCounter("RTFtrgaph") * getCounter("RTFtrgaphnum")); /* add extra space */
                     free(t);
                     diagnostics(6,"p item, width=%d, residual='%s'",table->width[iCol], s);
                 }
@@ -232,17 +232,14 @@ static TabularT *NewTabularFromFormat(const char *format)
             case '>':
                 s++;
                 t=getStringBraceParam(&s);
-		/* remove align commands */
-		if (strcmp("\\raggedright", t) == 0)
-		  table->align[iCol+1] = 'l';
-		  break;
-		if (strcmp("\\raggedleft", t) == 0)
-		  table->align[iCol+1] = 'r';
-		  break;
-		if (strcmp("\\centering", t) == 0)
-		  table->align[iCol+1] = 'c';
-		  break;
-		old = table->after[iCol+1];
+                /* remove align commands */
+                if (strcmp("\\raggedright", t) == 0)
+                    table->align[iCol+1] = 'l';
+                if (strcmp("\\raggedleft", t) == 0)
+                    table->align[iCol+1] = 'r';
+                if (strcmp("\\centering", t) == 0)
+                    table->align[iCol+1] = 'c';
+                old = table->after[iCol+1];
                 if (old) {
                     table->after[iCol+1] = strdup_together(t, old);
                     free(t);
@@ -759,6 +756,7 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
       row_num = 1;
     else
       row_num++;
+
     headrows = getCounter("RTFheadrows");
     
     TabularBeginRow(table, this_row, next_row, first_row, 0, (row_num <= headrows));
@@ -1108,6 +1106,11 @@ void CmdTabular(int code)
                     setCounter("RTFheadrows", headrows);
                 }
             }
+            /* for nonlong table provide some automatic for head processing if asked */
+            else {
+                if (saved_headrows == -1 && strstr(table, "\\hline"))
+                    setCounter("RTFheadrows", 1);
+            }
 
             if (getTexMode() != MODE_HORIZONTAL) {
                 CmdIndent(INDENT_NONE);
@@ -1159,7 +1162,8 @@ void CmdTabular(int code)
     }
 
     ConvertString(end);
-   
+    CmdIndent(INDENT_USUAL);
+    
     free(table);
     free(end);
     free(begin);

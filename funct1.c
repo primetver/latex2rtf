@@ -780,7 +780,7 @@ void CmdCaption(int code)
     if (g_processing_figure && g_figure_label)
         InsertBookmark(g_figure_label, number);
 
-    else if (g_processing_table && g_table_label)
+    else if ((g_processing_table || g_processing_tabular) && g_table_label)
         InsertBookmark(g_table_label, number);
 
     else

@@ -654,7 +654,9 @@ void CmdAlign(int code)
         return;
     }
     
-    CmdEndParagraph(0);
+    if (!g_processing_tabular)
+        CmdEndParagraph(0);
+    
     switch (code) {
         case (PAR_CENTERLINE):
             old_alignment_before_centerline = getAlignment();
