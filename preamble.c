@@ -600,10 +600,13 @@ void CmdDocumentStyle(int code)
         diagnostics(WARNING, "Document format <%s> unknown, using article format", format);
     
     /* Set up deafults for RTF conversion */
-    setCounter("RTFtrgaph", 135);       /* horisontal gap in between cells in twips */
-    setCounter("RTFtrgaphnum", 2);      /* add RTFtrgaphnum * RTFtrgaph width to cols (like latex labular do) */
+    setCounter("RTFtrpaddb", 60);       /* table cell bottom magrin in twips */
+    setCounter("RTFtrpaddt", 60);       /* table cell top magrin in twips */
+    setCounter("RTFtrpaddl", 130);      /* table cell left magrin in twips */
+    setCounter("RTFtrpaddr", 130);      /* table cell right magrin in twips */
     setCounter("RTFheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */
     setCounter("RTFtrkeep", 1);         /* non breake row flag */
+    setCounter("RTFamount", 300);       /* list item amount */
     
     /* Try to include support file for document class *NI*/
     char *texsource;

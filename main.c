@@ -126,6 +126,7 @@ int g_tab_counter = 0;
 int g_processing_table = FALSE;
 int g_processing_tabbing = FALSE;
 int g_processing_tabular = FALSE;
+int g_processing_cell = FALSE;
 
 double g_png_equation_scale = 1.00;
 double g_png_figure_scale = 1.00;

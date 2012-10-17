@@ -187,7 +187,7 @@ void changeTexMode(int mode)
     diagnostics(6, "TeX mode changing from [%s] -> [%s]", TexModeName[g_TeX_mode], TexModeName[mode]);
 
     if (g_TeX_mode == MODE_VERTICAL && mode == MODE_HORIZONTAL)
-      if (g_processing_tabular) { 
+      if (g_processing_cell) {
 	if (g_par_brace == 1)
 	  CmdEndParagraph(0);
 	g_par_brace++;
@@ -365,29 +365,34 @@ void startParagraph(const char *style, int indenting)
         g_column_new = FALSE;
     }
 
-    fprintRTF("\\pard\\plain");
-    InsertStyle(the_style);
-    if (strcmp(the_style,"equation")==0)
-        fprintRTF("\\tqc\\tx%d", b);
-    if (strcmp(the_style,"equationNum")==0)
-        fprintRTF("\\tqc\\tx%d\\tqr\\tx%d", b, width);
-    if (strcmp(the_style,"equationAlign")==0)
-        fprintRTF("\\tqr\\tx%d\\tql\\tx%d", a, b);
-    if (strcmp(the_style,"equationAlignNum")==0)
-        fprintRTF("\\tqr\\tx%d\\tql\\tx%d\\tqr\\tx%d", a, b, width);
-    if (strcmp(the_style,"equationArray")==0)
-        fprintRTF("\\tqr\\tx%d\\tqc\\tx%d\\tql\\tx%d", a, b, c);
-    if (strcmp(the_style,"equationArrayNum")==0)
-        fprintRTF("\\tqr\\tx%d\\tqc\\tx%d\\tql\\tx%d\\tqr\\tx%d", a, b, c, width);
+    if (!g_processing_cell) {
+        fprintRTF("\\pard\\plain");
+        InsertStyle(the_style);
+    
+        if (strcmp(the_style,"equation")==0)
+            fprintRTF("\\tqc\\tx%d", b);
+        if (strcmp(the_style,"equationNum")==0)
+            fprintRTF("\\tqc\\tx%d\\tqr\\tx%d", b, width);
+        if (strcmp(the_style,"equationAlign")==0)
+            fprintRTF("\\tqr\\tx%d\\tql\\tx%d", a, b);
+        if (strcmp(the_style,"equationAlignNum")==0)
+            fprintRTF("\\tqr\\tx%d\\tql\\tx%d\\tqr\\tx%d", a, b, width);
+        if (strcmp(the_style,"equationArray")==0)
+            fprintRTF("\\tqr\\tx%d\\tqc\\tx%d\\tql\\tx%d", a, b, c);
+        if (strcmp(the_style,"equationArrayNum")==0)
+            fprintRTF("\\tqr\\tx%d\\tqc\\tx%d\\tql\\tx%d\\tqr\\tx%d", a, b, c, width);
 
-    if (strcmp(the_style,"bitmapCenter")==0)
-        fprintRTF("\\tqc\\tx%d\\tqr\\tx%d", b, width);
+        if (strcmp(the_style,"bitmapCenter")==0)
+            fprintRTF("\\tqc\\tx%d\\tqr\\tx%d", b, width);
 
-    /* TODO change width/6 with hint */
-    if (strcmp(the_style,"acronym")==0)
-        fprintRTF("\\tx%d\\tqr\\tldot\\tx%d", acronymHint(width), width);
-        
-    fprintRTF("\\sl%i\\slmult1 ", getLineSpacing());
+        /* TODO change width/6 with hint */
+        if (strcmp(the_style,"acronym")==0)
+            fprintRTF("\\tx%d\\tqr\\tldot\\tx%d", acronymHint(width), width);
+
+        fprintRTF("\\sl%i\\slmult1 ", getLineSpacing());
+    } else {
+        fprintRTF("\\pard\\intbl");  
+    }
 
     if (next_no_vskip == TRUE)
 	/* redefine style - use zero extra space after section titles */

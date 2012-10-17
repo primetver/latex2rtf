@@ -204,7 +204,7 @@ static TabularT *NewTabularFromFormat(const char *format)
                 s++;
                 t=getStringBraceParam(&s);
                 if (t) {
-                    table->width[iCol] = getStringDimension(t) + (getCounter("RTFtrgaph") * getCounter("RTFtrgaphnum")); /* add extra space */
+                    table->width[iCol] = getStringDimension(t) + getCounter("RTFtrpaddl") + getCounter("RTFtrpaddr"); /* add margin space */
                     free(t);
                     diagnostics(6,"p item, width=%d, residual='%s'",table->width[iCol], s);
                 }
@@ -287,6 +287,7 @@ static void BeginCellRTF(char align)
  purpose:  emit RTF code to start each cell
  ******************************************************************************/
 {
+    g_processing_cell = TRUE;
     fprintRTF("{\\pard\\intbl\\q%c ", align);
 }
 
@@ -297,6 +298,7 @@ static void EndCellRTF(void)
  ******************************************************************************/
 {
     fprintRTF("\\cell}\n");
+    g_processing_cell = FALSE;
 }
 
 static int TabularColumnPosition(TabularT *table, int n)
@@ -617,13 +619,20 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    fprintRTF("{\\trowd\\trrh%d\\trgaph%d", height, getCounter("RTFtrgaph")); /* add \trrh and \trgaph */
+    int trpaddb = getCounter("RTFtrpaddb");
+
+    /* \\trrh%d\\trgaph%d replaced */
+    fprintRTF("{\\trowd\\trpaddb%d\\trpaddl%d\\trpaddr%d\\trpaddt%d\\trpaddfb3\\trpaddfl3\\trpaddfr3\\trpaddft3",
+              height > trpaddb ? height : trpaddb,
+              getCounter("RTFtrpaddl"),
+              getCounter("RTFtrpaddr"),
+              getCounter("RTFtrpaddt"));
     
     if (headrow)
-       fprintRTF("\\trhdr\\clvertalc");  /* head row repeat on every page, vertical centering */
+        fprintRTF("\\trhdr\\trkeepfollow");  /* head row repeat on every page, keep with next row */
    
     if (getCounter("RTFtrkeep") > 0)
-       fprintRTF("\\trkeep");            /* keep row together (default set to 1) */
+        fprintRTF("\\trkeep"); /* keep row together (default set to 1) */
        
     cell_start = (char *) this_row;
     column = 0;
@@ -642,6 +651,9 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
         TabularGetCell(cell_start, &cell, &cell_end);
         TabularMultiParameters(cell, &span, &align, &multi_left_border, &multi_right_border);
                 
+        if (headrow)
+            fprintRTF("\\clvertalc");  /* centered vertial alignment for head row */
+
         if (span > 1)
             fprintRTF("\\clmgf");
             
@@ -756,7 +768,7 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
 
     headrows = getCounter("RTFheadrows");
     
-    TabularBeginRow(table, this_row, next_row, first_row, 0, (row_num <= headrows));
+    TabularBeginRow(table, this_row, next_row, first_row, height, (row_num <= headrows));
     cell_start = (char *) this_row;
     table->i = 0;
     while (cell_start) {
@@ -770,14 +782,14 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
             n = 1;
         }
 
-        if (row_num <= headrows && ESKDMode) /* force centering for head rows in ESKDMode */
+        if (row_num <= headrows && ESKDMode)    /* force centering for head rows in ESKDMode */
 	    BeginCellRTF('c');	
 	  else
 	    BeginCellRTF(align);
         if (cell != NULL) {
+            if (row_num <= headrows && ESKDMode)
+                fprintRTF("\\b ");              /* force bold for head rows in ESKDMode */
             fprintRTF("{");
-	    if (row_num <= headrows && ESKDMode)
-	      fprintRTF("\\b "); /* force bold for head rows in ESKDMode */
             ConvertString(cell);
             fprintRTF("}");
         }
@@ -789,21 +801,6 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
     }
 
     TabularEndRow();
-    
-    /* add extra space after -- empty row with height *NI*/
-    if (height) {
-      TabularBeginRow(table, this_row, next_row, first_row, height, FALSE);
-      cell_start = (char *) this_row;
-      while (cell_start) {
-	  TabularGetCell(cell_start, &cell, &cell_end);
-	  BeginCellRTF('l');
-	  EndCellRTF();
-	  cell_start = cell_end;
-	  free(cell);
-      }
-      TabularEndRow();
-    }
-      
 }
 
 static int TabularMeasureCell(const char *cell)
@@ -940,7 +937,7 @@ void CmdTabular(int code)
             \begin{array}[pos]{cols}            ... \end{array}
  ******************************************************************************/
 {
-    int true_code, this_height, first_row, begins, ends, saved_headrows;
+    int true_code, this_height, next_height, first_row, begins, ends, saved_headrows;
     char *end=NULL, *begin=NULL, *this_row, *next_row_start;
     char *table = NULL;
     char *cols = NULL;
@@ -952,8 +949,8 @@ void CmdTabular(int code)
     if (!(code & ON)) {
         diagnostics(4, "Exiting CmdTabular");
         g_processing_tabular = FALSE;
-	CmdEndParagraph(0); /* added *NI*/
-	return;
+        CmdEndParagraph(0); /* added *NI*/
+        return;
     }
     
     g_processing_tabular = TRUE;
@@ -999,7 +996,7 @@ void CmdTabular(int code)
     
     if (g_tabular_display_rtf)
     {
-    /* need to make sure that we don't have nested environments */
+        /* need to make sure that we don't have nested environments */
         begins = strstr_count(table, begin);
         ends = strstr_count(table, end);
     
@@ -1136,10 +1133,11 @@ void CmdTabular(int code)
             first_row = TRUE;
             while (this_row) {
                 char *next_row;
-                TabularGetRow(next_row_start, &next_row, &next_row_start, &this_height);
+                TabularGetRow(next_row_start, &next_row, &next_row_start, &next_height);
                 TabularWriteRow(tabular_layout, this_row, next_row, this_height, first_row);
                 free(this_row);
                 this_row = next_row;
+                this_height = next_height;
                 first_row = FALSE;
             }
 
@@ -1622,7 +1620,7 @@ void CmdHline(int code)
     if (code == 1) {
         s = getBraceParam();
         free(s);
-        skipSpaces();
+        skipWhiteSpace();
     }
 }
 

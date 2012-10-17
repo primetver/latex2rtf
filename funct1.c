@@ -959,16 +959,18 @@ void CmdList(int code)
 
 /******************************************************************************
   purpose : set indentation and counters for itemize, description and enumerate
- globals  : indent
+  globals  : indent
  ******************************************************************************/
 {
     int vspace, hspace;
-    static int amount = 300;
-    
-    if (g_processing_list_environment == FALSE)
-      hspace = getLength("parindent") + amount;
+    int amount = getCounter("RTFamount");
+
+    if (g_processing_cell)
+        hspace = amount;
+    else if (g_processing_list_environment == FALSE)
+        hspace = getLength("parindent") + amount;
     else
-      hspace = 2 * amount; 
+        hspace = 2 * amount; 
   
     vspace = getLength("topsep") + getLength("parskip");
    

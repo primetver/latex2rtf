@@ -89,6 +89,7 @@ extern int      g_processing_figure;
 extern int      g_processing_table;
 extern int      g_processing_tabbing;
 extern int      g_processing_tabular;
+extern int      g_processing_cell;
 extern int      g_processing_eqnarray;
 extern int      g_processing_arrays;
 extern uint16_t g_dots_per_inch;
