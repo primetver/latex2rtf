@@ -507,7 +507,7 @@ void CmdSection(int code)
 
 /******************************************************************************
   purpose: converts the LaTeX-section-commands into similar Rtf-styles
-parameter: code: type of section-recursion-level
+  parameter: code: type of section-recursion-level
  ******************************************************************************/
 {
     char *toc_entry;

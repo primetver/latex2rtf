@@ -1630,11 +1630,10 @@ static void WriteInfo(void)
  ***************************************************************************/
 {
 /*  struct stat sb;*/
-    time_t tm;
-
-    fprintRTF("{\\info\n{\\title Original file was %s}\n",CurrentFileName());
-    tm = time(NULL);
-    fprintRTF("{\\doccomm Created using latex2rtf %s on %s}\n", Version, ctime(&tm));
+    time_t tm = time(NULL);
+    
+    fprintRTF("{\\info\n");
+    fprintRTF("{\\doccomm Created using LaTeX with latex2rtf %s on %s}\n", Version, ctime(&tm));
 /*  if (fstat(CurrentFileDescriptor(),&sb)) {} */
 /*  fprintRTF("{\\creatim %s}\n", ctime(&tm)); */
     fprintRTF("}\n");
