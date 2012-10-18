@@ -1669,8 +1669,8 @@ void CmdFigure(int code)
         setCounter("subfigure", 0);
         CmdEndParagraph(0);
         oldalignment = getAlignment();
-        setAlignment(JUSTIFIED);
-
+        setAlignment(CENTERED);
+        CmdIndent(INDENT_NONE);
         CmdVspace(VSPACE_BIG_SKIP);
         
         if (real_code == WRAP_FIGURE) {
@@ -1725,6 +1725,7 @@ void CmdFigure(int code)
         diagnostics(4, "exiting CmdFigure");
         setAlignment(oldalignment);
         CmdEndParagraph(0);
+        CmdIndent(INDENT_USUAL);
         CmdVspace(VSPACE_BIG_SKIP);
     }
 }
