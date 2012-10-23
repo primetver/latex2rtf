@@ -315,18 +315,18 @@ void CmdBeginEnd(int code)
 /* usual environments */
     if (code == CMD_BEGIN) {
         diagnostics(5, "\\begin{%s}", s);
-	PushEnvironment(GENERIC_MODE);    /* fix format tails after tabular environments changes *NI*/
+        PushEnvironment(GENERIC_MODE);    /* fix format tails after tabular environments changes *NI*/
         (void) CallParamFunc(s, ON);
     } else {
         diagnostics(5, "\\end{%s}", s);
         (void) CallParamFunc(s, OFF);
-	PopEnvironment();		 /* see above */
-	if (strcmp(s, "setspace") != 0 && strcmp(s, "doublespace") != 0) 
-	    CmdIndent(INDENT_INHIBIT);
-	/* some hack for Lyx: force indent after lists in eskd mode text NI*/
-	if (ESKDMode)
-	    if (strcmp(s, "itemize") == 0 || strcmp(s, "description") == 0 || strcmp(s, "enumerate") == 0)
-		CmdIndent(INDENT_USUAL);
+        PopEnvironment();		 /* see above */
+        if (strcmp(s, "setspace") != 0 && strcmp(s, "doublespace") != 0)
+            CmdIndent(INDENT_INHIBIT);
+        /* some hack for Lyx: force indent after lists in eskd mode text NI*/
+        if (ESKDMode)
+            if (strcmp(s, "itemize") == 0 || strcmp(s, "description") == 0 || strcmp(s, "enumerate") == 0)
+                CmdIndent(INDENT_USUAL);
     }
     free(s);
 }

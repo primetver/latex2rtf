@@ -38,6 +38,7 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
 #include "preamble.h"
 #include "graphics.h"
 #include "vertical.h"
+#include "styles.h"
 
 typedef struct TabularT {
     int n;         /* number of columns, 0 column unused except in vert */
@@ -288,7 +289,12 @@ static void BeginCellRTF(char align)
  ******************************************************************************/
 {
     g_processing_cell = TRUE;
-    fprintRTF("{\\pard\\intbl\\q%c ", align);
+    fprintRTF("{\\pard\\intbl");
+    if (g_processing_tabular)
+        InsertStyle("tabular");
+    else if (g_processing_tabbing)
+        InsertStyle("tabbing");
+    fprintRTF("\\q%c ", align);
 }
 
 static void EndCellRTF(void)
@@ -949,7 +955,8 @@ void CmdTabular(int code)
     if (!(code & ON)) {
         diagnostics(4, "Exiting CmdTabular");
         g_processing_tabular = FALSE;
-        CmdEndParagraph(0); /* added *NI*/
+        CmdIndent(INDENT_USUAL);
+        /*CmdEndParagraph(0);*/
         return;
     }
     
@@ -1106,11 +1113,11 @@ void CmdTabular(int code)
                     setCounter("RTFheadrows", 1);
             }
 
-            if (getTexMode() != MODE_HORIZONTAL) {
+            /*if (getTexMode() != MODE_HORIZONTAL) {
                 CmdIndent(INDENT_NONE);
-                startParagraph("tabular", PARAGRAPH_FIRST); /* changed *NI*/
-            }
-
+                startParagraph("Normal", PARAGRAPH_FIRST);
+            }*/
+            
             /* PrintTabular(tabular_layout); */
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
             diagnostics(5, "%s",table);
@@ -1157,7 +1164,6 @@ void CmdTabular(int code)
     }
 
     ConvertString(end);
-    CmdIndent(INDENT_USUAL);
     
     free(table);
     free(end);
@@ -1452,6 +1458,7 @@ void CmdTabbing(int code)
 
     if (!(code & ON)) {
         diagnostics(4, "Exiting CmdTabbing");
+        /*CmdEndParagraph(0);*/
         g_processing_tabbing = FALSE;
         return;
     }
@@ -1477,12 +1484,10 @@ void CmdTabbing(int code)
     
         diagnostics(5, "tabbing_tabbing_tabbing\n%s\ntabbing_tabbing_tabbing", table);
     
-        if (getTexMode() != MODE_HORIZONTAL) {
+        /*if (getTexMode() != MODE_HORIZONTAL) {
             CmdIndent(INDENT_NONE);
-            startParagraph("tabbing", PARAGRAPH_FIRST);
-        }
-    
-        fprintRTF("\\par\n");
+            startParagraph("Normal", PARAGRAPH_FIRST);
+        }*/
     
         n_total = 0;
         while (this_row && strlen(this_row) > 0) {
