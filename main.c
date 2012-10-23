@@ -676,8 +676,8 @@ static void InitializeLatexLengths(void)
 /* vertical separation lengths */
     setLength("topsep", 3 * 20);
     setLength("partopsep", 2 * 20);
-    setLength("parsep", (int) (2.5 * 20));
-    setLength("itemsep", 0 * 20);
+    setLength("parsep", 3 * 20);
+    setLength("itemsep", 3 * 20);
     setLength("labelwidth", 0 * 20);
     setLength("labelsep", 0 * 20);
     setLength("itemindent", 0 * 20);
