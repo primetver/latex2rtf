@@ -673,10 +673,10 @@ static void InitializeLatexLengths(void)
     setCounter("endfloatfigure", 0);
     setCounter("endfloattable", 0);
 
-/* vertical separation lengths */
+    /* vertical separation lengths */
     setLength("topsep", 3 * 20);
     setLength("partopsep", 2 * 20);
-    setLength("parsep", 3 * 20);
+    setLength("parsep", 0 * 20);
     setLength("itemsep", 3 * 20);
     setLength("labelwidth", 0 * 20);
     setLength("labelsep", 0 * 20);
@@ -697,6 +697,15 @@ static void InitializeLatexLengths(void)
     setLength("bigskipamount", 12 * 20);
 
     setLength("marginparsep", 10 * 20);
+
+    /* Set up deafults for RTF conversion */
+    setCounter("RTFtrpaddb", 60);       /* table cell bottom magrin in twips */
+    setCounter("RTFtrpaddt", 60);       /* table cell top magrin in twips */
+    setCounter("RTFtrpaddl", 130);      /* table cell left magrin in twips */
+    setCounter("RTFtrpaddr", 130);      /* table cell right magrin in twips */
+    setCounter("RTFheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */
+    setCounter("RTFtrkeep", 1);         /* non breake row flag */
+    setCounter("RTFamount", 300);       /* list item amount */
 }
 
 static void ConvertLatexPreamble(void)

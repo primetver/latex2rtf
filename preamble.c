@@ -599,24 +599,15 @@ void CmdDocumentStyle(int code)
     } else
         diagnostics(WARNING, "Document format <%s> unknown, using article format", format);
     
-    /* Set up deafults for RTF conversion */
-    setCounter("RTFtrpaddb", 60);       /* table cell bottom magrin in twips */
-    setCounter("RTFtrpaddt", 60);       /* table cell top magrin in twips */
-    setCounter("RTFtrpaddl", 130);      /* table cell left magrin in twips */
-    setCounter("RTFtrpaddr", 130);      /* table cell right magrin in twips */
-    setCounter("RTFheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */
-    setCounter("RTFtrkeep", 1);         /* non breake row flag */
-    setCounter("RTFamount", 300);       /* list item amount */
-    
     /* Try to include support file for document class *NI*/
     char *texsource;
     texsource = strdup_together(format, ".tex");
     if (PushSource(texsource, NULL) == 0)
-	diagnostics(WARNING, "Include %s class support file...", texsource);
+        diagnostics(WARNING, "Include %s class support file...", texsource);
     else
-	if (ESKDMode == TRUE)
-	  /* support for eskdtext is mantadory *NI*/
-	  diagnostics(ERROR, "Can't include %s class support file, check if it exists in the config path %s/latex/! Giving Up....", texsource, g_config_path);
+        if (ESKDMode == TRUE)
+        /* support for eskdtext is mantadory *NI*/
+        diagnostics(ERROR, "Can't include %s class support file, check if it exists in the config path %s/latex/! Giving Up....", texsource, g_config_path);
     
     if (options_with_spaces) {
         options = strdup_noblanks(options_with_spaces);
