@@ -48,7 +48,7 @@ static int existsCounter(char *s)
 {
     int i = 0;
   
-    while (i < iCounterCount && strstr(Counters[i].name, s) == NULL)
+    while (i < iCounterCount && strcmp(Counters[i].name, s) != 0)
         i++;
 
     if (i == iCounterCount)
@@ -69,7 +69,7 @@ static int nextChild(char *s, int i)
   
     while (i < iCounterCount) {
       if (Counters[i].parent != NULL)
-	if (strstr(Counters[i].parent, s) != NULL)
+	if (strcmp(Counters[i].parent, s) == 0)
 	  break;
       i++;
     }
@@ -114,8 +114,8 @@ static void newCounter(char *s, int n, char* p)
         snprintf(arg, 50, "\\arabic{%s}", s);
     
     newDefinition(cmd, NULL, arg, 0);
-    diagnostics(WARNING, "thecounter=\\%s, defined=%s", cmd, arg);
-    safe_free(cmd);
+    diagnostics(5, "thecounter <\\%s>, defined as <%s>", cmd, arg);
+    free(cmd);
 }
 
 void incrementCounter(char *s)
@@ -142,7 +142,6 @@ void incrementCounter(char *s)
 	}
 	diagnostics(3, "Done for counter %s", s);
     }
-	
 }
 
 void setCounter(char *s, int n)
@@ -156,10 +155,7 @@ void setCounterParent(char *s, int n, char *p)
      purpose: allocates (if necessary) and sets a named TeX counter 
 **************************************************************************/
 {
-    int i;
-
-    i = existsCounter(s);
-
+    int i = existsCounter(s);
     if (i < 0)
         newCounter(s, n, p);
     else

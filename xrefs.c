@@ -766,7 +766,8 @@ void InsertBookmark(char *name, char *text)
     if (!name) {
         if (getTexMode() == MODE_VERTICAL)
             changeTexMode(MODE_HORIZONTAL);
-        fprintRTF("%s", text);
+        /*fprintRTF("%s", text);*/
+        ConvertString(text);
         return;
     }
     
@@ -823,14 +824,8 @@ void CmdLabel(int code)
             if (mode == MODE_DISPLAYMATH) {
                 g_equation_label = strdup(text); /* was strdup_nobadchars(text); */
                 diagnostics(4, "equation label is <%s>", text);
-            } else {
-                if (g_current_ref) {
-                    InsertBookmark(text, g_current_ref);
-                    set_current_ref(NULL);
-                }
-                else
-                    InsertBookmark(text, "");
-            }
+            } else
+                InsertBookmark(text, g_current_ref);
             break;
 
         case LABEL_HYPERREF:
@@ -872,7 +867,7 @@ void CmdLabel(int code)
             }
 
             safe_free(signet);
-            if (s) safe_free(s);
+            safe_free(s);
                             
             break;
 
@@ -918,13 +913,12 @@ void CmdLabel(int code)
             }
             
             safe_free(signet);
-            if (s) safe_free(s);
+            safe_free(s);
             break;
     }
 
     safe_free(text);
-    if (option)
-        safe_free(option);
+    safe_free(option);
 }
 
 /*

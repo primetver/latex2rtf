@@ -284,7 +284,7 @@ static CommandArray commands[] = {
     {"includeonly", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"nocite", CmdNoCite, No_Opt_One_NormParam},
     {"stepcounter", CmdCounter, COUNTER_STEP},
-    {"refstepcounter", CmdCounter, COUNTER_STEP},
+    {"refstepcounter", CmdCounter, COUNTER_REFSTEP},
     {"fnsymbol", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"Alph", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"alph", CmdIgnoreParameter, No_Opt_One_NormParam},

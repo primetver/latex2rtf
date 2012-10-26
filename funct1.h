@@ -88,11 +88,12 @@ void CmdQuote(int code);
 
 void CmdList(int code);
 
-#define COUNTER_NEW   1
-#define COUNTER_SET   2
-#define COUNTER_ADD   3
-#define COUNTER_VALUE 4
-#define COUNTER_STEP  5
+#define COUNTER_NEW      1
+#define COUNTER_SET      2
+#define COUNTER_ADD      3
+#define COUNTER_VALUE    4
+#define COUNTER_STEP     5
+#define COUNTER_REFSTEP  6
 
 void CmdCounter(int code);
 

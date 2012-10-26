@@ -846,8 +846,15 @@ void CmdCounter(int code)
         setCounterParent(s, 0, p);
         safe_free(p);
     
-    } else if (code == COUNTER_STEP) {
+    } else if (code == COUNTER_STEP || code == COUNTER_REFSTEP) {
         incrementCounter(s);
+        if (code == COUNTER_REFSTEP) {
+            /* renew current ref value, will use within next \\label */
+            char *ref;
+            ref = strdup_together("\\the", s);
+            set_current_ref(ref);
+            free(ref);
+        }
 
     } else if (code == COUNTER_VALUE) {
         if (getTexMode() == MODE_VERTICAL)

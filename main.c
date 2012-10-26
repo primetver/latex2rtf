@@ -660,10 +660,10 @@ static void InitializeLatexLengths(void)
     setCounter("part", 0);
     setCounter("chapter", 0);
     setCounter("section", 0);
-    setCounter("subsection", 0);
-    setCounter("subsubsection", 0);
-    setCounter("paragraph", 0);
-    setCounter("subparagraph", 0);
+    setCounterParent("subsection", 0, "section");
+    setCounterParent("subsubsection", 0, "subsection");
+    setCounterParent("paragraph", 0, "subsubsection");
+    setCounterParent("subparagraph", 0, "paragraph");
     setCounter("figure", 0);
     setCounter("table", 0);
     setCounter("equation", 0);

@@ -464,6 +464,7 @@ void CmdEndParagraph(int code)
         
     if (g_par_brace == 1) {
         endAllFields();
+        set_current_ref(NULL);
         fprintRTF("\\par\n");
         setTexMode(MODE_VERTICAL);
         g_par_brace=0;

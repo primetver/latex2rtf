@@ -577,7 +577,7 @@ void preParse(char **body, char **header, char **label)
             i_match == e_eqnarray_item  || i_match == e_eqnarray_item2  ||
             i_match == e_table_item     || i_match == e_table_item2     ||
             i_match == e_longtable_item || i_match == e_longtable_item2 ||
-            i_match == b_itemize_item   || i_match == b_enumerate_item  ||
+            i_match == e_itemize_item   || i_match == e_enumerate_item  ||
             i_match == e_description_item)  {
             label_depth--;      /* labels may now be the section label */
             cmd_pos = 0;
