@@ -164,20 +164,24 @@ void preParse(char **body, char **header, char **label)
     int any_possible_match, found;
     char cNext, cThis, *s, *text, *next_header, *str, *p;
     int i;
-    int possible_match[43];
-    char *command[43] = { "",   /* 0 entry is for user definitions */
+    int possible_match[51];
+    char *command[51] = { "",   /* 0 entry is for user definitions */
         "",                     /* 1 entry is for user environments */
         "\\begin{verbatim}", 
         "\\begin{figure}",      "\\begin{figure*}", 
         "\\begin{equation}",    "\\begin{equation*}",
         "\\begin{eqnarray}",    "\\begin{eqnarray*}",
         "\\begin{table}",       "\\begin{table*}",
+        "\\begin{longtable}",   "\\begin{longtable*}",
+        "\\begin{itemize}",     "\\begin{enumerate}",
         "\\begin{description}", "\\begin{comment}",
         "\\end{verbatim}", 
         "\\end{figure}",        "\\end{figure*}", 
         "\\end{equation}",      "\\end{equation*}",
         "\\end{eqnarray}",      "\\end{eqnarray*}",
         "\\end{table}",         "\\end{table*}",
+        "\\end{longtable}",     "\\end{longtable*}",
+        "\\end{itemize}",       "\\end{enumerate}",
         "\\end{description}",   "\\end{comment}",
         "\\part", "\\chapter",  "\\section", "\\subsection", "\\subsubsection",
         "\\section*", "\\subsection*", "\\subsubsection*",
@@ -185,7 +189,7 @@ void preParse(char **body, char **header, char **label)
         "\\newcommand", "\\def", "\\renewcommand", "\\endinput", "\\end{document}",
     };
 
-    int ncommands = 43;
+    int ncommands = 51;
 
     const int b_verbatim_item = 2;
     const int b_figure_item = 3;
@@ -196,33 +200,40 @@ void preParse(char **body, char **header, char **label)
     const int b_eqnarray_item2 = 8;
     const int b_table_item = 9;
     const int b_table_item2 = 10;
-    const int b_description_item = 11;
-    const int b_comment_item = 12;
-    const int e_verbatim_item = 13;
-    const int e_figure_item = 14;
-    const int e_figure_item2 = 15;
-    const int e_equation_item = 16;
-    const int e_equation_item2 = 17;
-    const int e_eqnarray_item = 18;
-    const int e_eqnarray_item2 = 19;
-    const int e_table_item = 20;
-    const int e_table_item2 = 21;
-    
-    const int e_description_item = 22;
-    const int e_comment_item = 23;
+    const int b_longtable_item = 11;
+    const int b_longtable_item2 = 12;
+    const int b_itemize_item = 13;
+    const int b_enumerate_item = 14;
+    const int b_description_item = 15;
+    const int b_comment_item = 16;
+    const int e_verbatim_item = 17;
+    const int e_figure_item = 18;
+    const int e_figure_item2 = 19;
+    const int e_equation_item = 20;
+    const int e_equation_item2 = 21;
+    const int e_eqnarray_item = 22;
+    const int e_eqnarray_item2 = 23;
+    const int e_table_item = 24;
+    const int e_table_item2 = 25;
+    const int e_longtable_item = 26;
+    const int e_longtable_item2 = 27;
+    const int e_itemize_item = 28;
+    const int e_enumerate_item = 29;
+    const int e_description_item = 30;
+    const int e_comment_item = 31;
 
-    const int label_item = 32;
-    const int input_item = 33;
-    const int include_item = 34;
+    const int label_item = 40;
+    const int input_item = 41;
+    const int include_item = 42;
     
-    const int verb_item = 35;
-    const int url_item = 36;
-    const int nolinkurl_item = 37;
-    const int new_item = 38;
-    const int def_item = 39;
-    const int renew_item = 40;
-    const int endinput_item = 41;
-    const int e_document_item = 42;
+    const int verb_item = 43;
+    const int url_item = 44;
+    const int nolinkurl_item = 45;
+    const int new_item = 46;
+    const int def_item = 47;
+    const int renew_item = 48;
+    const int endinput_item = 49;
+    const int e_document_item = 50;
 
     int bs_count = 0;          /* number of backslashes encountered in a row */
     size_t cmd_pos = 0;        /* position of start of command relative to end of buffer */
@@ -520,7 +531,7 @@ void preParse(char **body, char **header, char **label)
             add_chr_to_buffer('}');
 
             if (!(*label) && strlen(tag) && label_depth == 0)
-                *label = strdup_nobadchars(tag);
+                *label = strdup(tag); /* was strdup_nobadchars(tag), but labels now allow all chars*/
 
             free(tag);
             cmd_pos = 0;          /* keep looking */
@@ -549,20 +560,24 @@ void preParse(char **body, char **header, char **label)
             continue;
         }
 
-        if (i_match == b_figure_item   || i_match == b_figure_item2   || 
-            i_match == b_equation_item || i_match == b_equation_item2 || 
-            i_match == b_eqnarray_item || i_match == b_eqnarray_item2 ||
-            i_match == b_table_item    || i_match == b_table_item2    ||
+        if (i_match == b_figure_item    || i_match == b_figure_item2    || 
+            i_match == b_equation_item  || i_match == b_equation_item2  || 
+            i_match == b_eqnarray_item  || i_match == b_eqnarray_item2  ||
+            i_match == b_table_item     || i_match == b_table_item2     ||
+            i_match == b_longtable_item || i_match == b_longtable_item2 ||
+            i_match == b_itemize_item   || i_match == b_enumerate_item  ||
             i_match == b_description_item) {
             label_depth++;      /* labels now will not be the section label */
             cmd_pos = 0;
             continue;
         }
 
-        if (i_match == e_figure_item   || i_match == e_figure_item2   || 
-            i_match == e_equation_item || i_match == e_equation_item2 || 
-            i_match == e_eqnarray_item || i_match == e_eqnarray_item2 ||
-            i_match == e_table_item    || i_match == e_table_item2    ||
+        if (i_match == e_figure_item    || i_match == e_figure_item2    || 
+            i_match == e_equation_item  || i_match == e_equation_item2  || 
+            i_match == e_eqnarray_item  || i_match == e_eqnarray_item2  ||
+            i_match == e_table_item     || i_match == e_table_item2     ||
+            i_match == e_longtable_item || i_match == e_longtable_item2 ||
+            i_match == b_itemize_item   || i_match == b_enumerate_item  ||
             i_match == e_description_item)  {
             label_depth--;      /* labels may now be the section label */
             cmd_pos = 0;

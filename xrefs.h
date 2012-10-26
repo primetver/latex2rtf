@@ -130,6 +130,9 @@ void CmdBCAY(int code);
 void CmdApaCite(int code);
 void set_longnamesfirst(void);
 
+void set_current_ref(char *value);
+char * get_current_ref();
+
 void set_bibpunct_style_super(void);
 void set_bibpunct_style_number(void);
 void set_bibpunct_style_separator(char *s);

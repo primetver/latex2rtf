@@ -52,6 +52,7 @@ char *g_figure_label = NULL;
 char *g_table_label = NULL;
 char *g_equation_label = NULL;
 char *g_section_label = NULL;
+char *g_current_ref = NULL;
 int g_suppress_name = FALSE;
 static int g_warned_once = FALSE;
 
@@ -159,7 +160,18 @@ void set_compressed_citations(void)
     g_compressed_citations = TRUE;
 }
 
-static char *make_signet(const char *s)
+void set_current_ref(char *value)
+{
+    safe_free(g_current_ref);
+    g_current_ref = strdup_noendblanks(value);
+}
+
+char * get_current_ref()
+{
+    return g_current_ref;
+}
+
+static char * make_signet(const char *s)
 {
     static int signet_count = 0;
     char *signet;
@@ -769,7 +781,8 @@ void InsertBookmark(char *name, char *text)
         RecordBookmark(signet);
         if (fields_use_REF())
             fprintRTF("{\\*\\bkmkstart BM_%s}", signet);
-        fprintRTF("%s", text);
+        /*fprintRTF("%s", text);*/
+        ConvertString(text);
         if (fields_use_REF())
             fprintRTF("{\\*\\bkmkend BM_%s}", signet);
     }
@@ -808,10 +821,16 @@ void CmdLabel(int code)
 	        /* already inserted while processing \caption */
                 break;
             if (mode == MODE_DISPLAYMATH) {
-                g_equation_label = strdup_nobadchars(text);
+                g_equation_label = strdup(text); /* was strdup_nobadchars(text); */
                 diagnostics(4, "equation label is <%s>", text);
-            } else
-                InsertBookmark(text, "");
+            } else {
+                if (g_current_ref) {
+                    InsertBookmark(text, g_current_ref);
+                    set_current_ref(NULL);
+                }
+                else
+                    InsertBookmark(text, "");
+            }
             break;
 
         case LABEL_HYPERREF:

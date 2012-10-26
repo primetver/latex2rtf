@@ -507,33 +507,33 @@ void CmdVspace(int code)
 
         case VSPACE_VSKIP:
             vspace = getDimension();
-    		if (getTexMode() != MODE_VERTICAL) {
-            	CmdEndParagraph(0);
-            	CmdIndent(INDENT_INHIBIT);
-            }    		
+                if (getTexMode() != MODE_VERTICAL) {
+                CmdEndParagraph(0);
+                CmdIndent(INDENT_INHIBIT);
+            }
             break;
 
         case VSPACE_SMALL_SKIP:
             vspace = getLength("smallskipamount");
-    		if (getTexMode() != MODE_VERTICAL) {
-            	CmdEndParagraph(0);
-            	CmdIndent(INDENT_INHIBIT);
-            }    		
+                if (getTexMode() != MODE_VERTICAL) {
+                CmdEndParagraph(0);
+                CmdIndent(INDENT_INHIBIT);
+            }
             break;
 
         case VSPACE_MEDIUM_SKIP:
             vspace = getLength("medskipamount");
-    		if (getTexMode() != MODE_VERTICAL) {
-            	CmdEndParagraph(0);
-            	CmdIndent(INDENT_INHIBIT);
+                if (getTexMode() != MODE_VERTICAL) {
+                CmdEndParagraph(0);
+                CmdIndent(INDENT_INHIBIT);
             }
             break;
 
         case VSPACE_BIG_SKIP:
             vspace = getLength("bigskipamount");
-    		if (getTexMode() != MODE_VERTICAL) {
-            	CmdEndParagraph(0);
-            	CmdIndent(INDENT_INHIBIT);
+                if (getTexMode() != MODE_VERTICAL) {
+                CmdEndParagraph(0);
+                CmdIndent(INDENT_INHIBIT);
             }
             break;
     }
@@ -602,30 +602,30 @@ void CmdLineSpacing(int code)
  ******************************************************************************/
 void CmdSpacingEnviron(int code)
 {
-	char *sizeParam;
-	static int originalSpacing=240;
-	float spacing;
+    char *sizeParam;
+    static int originalSpacing=240;
+    float spacing;
     int true_code = code & ~ON;
 
     if (code & ON) {
-		originalSpacing = getLineSpacing();
-		if (true_code==2)
-			setLineSpacing(480);
-		else {
-			sizeParam = getBraceParam();
-			if (*sizeParam) {     	
-				sscanf(sizeParam, "%f", &spacing);
-				setLineSpacing((int)240*spacing);
-				free(sizeParam);       	
-			}
-		}
-		PushEnvironment(SPACING_MODE);
-		return;
-	}
-	
-	CmdEndParagraph(0);
-	PopEnvironment();
-	setLineSpacing(originalSpacing);
+        originalSpacing = getLineSpacing();
+        if (true_code==2)
+                setLineSpacing(480);
+        else {
+                sizeParam = getBraceParam();
+                if (*sizeParam) {
+                        sscanf(sizeParam, "%f", &spacing);
+                        setLineSpacing((int)240*spacing);
+                        free(sizeParam);
+                }
+        }
+        PushEnvironment(SPACING_MODE);
+        return;
+    }
+
+    CmdEndParagraph(0);
+    PopEnvironment();
+    setLineSpacing(originalSpacing);
 }
 
 void CmdAlign(int code)

@@ -446,7 +446,7 @@ static void ConvertWholeDocument(void)
             g_section_label = label;
         }
         
-        diagnostics(2, "processing '%s'", sec_head);    
+        diagnostics(2, "processing '%s'", sec_head);
         diagnostics(5, "label is   '%s'", g_section_label);
         diagnostics(5, "next  is   '%s'", sec_head2);   
         show_string(2, body, "body ");

@@ -25,6 +25,7 @@ This file is available from http://sourceforge.net/projects/latex2rtf/
 #include "main.h"
 #include "utils.h"
 #include "counters.h"
+#include "definitions.h"
 
 #define MAX_COUNTERS 500
 
@@ -103,6 +104,18 @@ static void newCounter(char *s, int n, char* p)
     }
 
     iCounterCount++;
+    
+    /* provide standard \thecounter command */
+    char *cmd, arg[50];
+    cmd = strdup_together("the", s);
+    if (p)
+        snprintf(arg, 50, "\\the%s.\\arabic{%s}", p, s);
+    else
+        snprintf(arg, 50, "\\arabic{%s}", s);
+    
+    newDefinition(cmd, NULL, arg, 0);
+    diagnostics(WARNING, "thecounter=\\%s, defined=%s", cmd, arg);
+    safe_free(cmd);
 }
 
 void incrementCounter(char *s)

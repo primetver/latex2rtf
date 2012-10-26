@@ -667,10 +667,10 @@ void CmdSection(int code)
         case SECT_SUBSUBSUB:
         case SECT_SUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
-	    if (RussianMode) {
-		    setLength("parindent", -amount);
-		    setLeftMarginIndent(orig_left_margin + hspace);
-	    }
+            if (RussianMode) {
+                setLength("parindent", -amount);
+                setLeftMarginIndent(orig_left_margin + hspace);
+            }
             startParagraph("paragraph", PARAGRAPH_SECTION_TITLE);
             if (code == SECT_SUBSUBSUB && getCounter("secnumdepth") >= 3) {
                 incrementCounter("paragraph");
@@ -842,17 +842,17 @@ void CmdCounter(int code)
             setCounter(s, num);
 
     } else if (code == COUNTER_NEW) {
-	p = getBracketParam();
+        p = getBracketParam();
         setCounterParent(s, 0, p);
-	if (p) free(p);
+        safe_free(p);
     
     } else if (code == COUNTER_STEP) {
-	incrementCounter(s);
-	
+        incrementCounter(s);
+
     } else if (code == COUNTER_VALUE) {
-	if (getTexMode() == MODE_VERTICAL)
-             changeTexMode(MODE_HORIZONTAL);
-	fprintRTF("{%d}", getCounter(s));
+        if (getTexMode() == MODE_VERTICAL)
+            changeTexMode(MODE_HORIZONTAL);
+        fprintRTF("{%d}", getCounter(s));
     }
 
     free(s);
@@ -1081,6 +1081,8 @@ void CmdItem(int code)
         fprintRTF("}");
         if (code != DESCRIPTION_MODE && code != INPARAENUM_MODE)
             fprintRTF("\\tab\n");
+
+        set_current_ref(itemlabel);
     }
 
     switch (code) {
@@ -1097,16 +1099,18 @@ void CmdItem(int code)
         case ENUMERATE_MODE:
             if (itemlabel) 
                 break;
-	    if (ESKDMode && ( g_enumerate_depth == 1 )) {
-		/* Russian letters generation for item number */
-		if (item_number[g_enumerate_depth] > 0 && item_number[g_enumerate_depth] <= 25)
-		  ConvertString(ru_alpha[item_number[g_enumerate_depth] - 1].s);
-		else if (item_number[g_enumerate_depth] > 25)
-		  fprintRTF("%d", item_number[g_enumerate_depth] - 25);
-		else 
-		  fprintRTF("%d", item_number[g_enumerate_depth]);
-		fprintRTF(")");
-	    }
+            if (ESKDMode && ( g_enumerate_depth == 1 )) {
+                /* Russian letters generation for item number */
+                if (item_number[g_enumerate_depth] > 0 && item_number[g_enumerate_depth] <= 25) {
+                    ConvertString(ru_alpha[item_number[g_enumerate_depth] - 1].s);
+                    set_current_ref(ru_alpha[item_number[g_enumerate_depth] - 1].s);
+                } else if (item_number[g_enumerate_depth] > 25){
+                    fprintRTF("%d", item_number[g_enumerate_depth] - 25);
+                } else {
+                    fprintRTF("%d", item_number[g_enumerate_depth]);
+                }
+                fprintRTF(")");
+            }
 	    else if (RussianMode)
                 fprintRTF("%d)", item_number[g_enumerate_depth]);
 	    else
