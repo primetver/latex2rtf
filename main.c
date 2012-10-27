@@ -670,6 +670,7 @@ static void InitializeLatexLengths(void)
     setCounter("footnote", 0);
     setCounter("mpfootnote", 0);
     setCounter("secnumdepth", 2);
+    setCounter("tocdepth", 2);
     setCounter("endfloatfigure", 0);
     setCounter("endfloattable", 0);
 

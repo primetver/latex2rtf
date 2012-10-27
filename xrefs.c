@@ -818,7 +818,7 @@ void CmdLabel(int code)
     }
     switch (code) {
         case LABEL_LABEL:
-            if (g_processing_figure || g_processing_table)
+            if (g_processing_figure || g_processing_table || g_processing_tabular)
 	        /* already inserted while processing \caption */
                 break;
             if (mode == MODE_DISPLAYMATH) {

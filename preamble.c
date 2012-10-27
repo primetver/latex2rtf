@@ -983,11 +983,11 @@ void CmdTableOfContents(int code)
     fprintRTF(" ");
     ConvertBabelName("CONTENTSNAME");
     CmdEndParagraph(0);
+    CmdVspace(VSPACE_SMALL_SKIP);
     
     g_tableofcontents = TRUE;
     startParagraph("Normal", PARAGRAPH_GENERIC);
-    CmdVspace(VSPACE_SMALL_SKIP);
-    fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-3\" }{\\fldrslt }}\n");  
+    fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-%d\" }{\\fldrslt }}\n", getCounter("tocdepth")+1);  
     /* CmdNewPage(NewPage); */
     CmdEndParagraph(0);
 }
