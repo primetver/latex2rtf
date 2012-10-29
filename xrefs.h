@@ -122,13 +122,19 @@ void CmdNewblock(int code);
 void CmdIndex(int code);
 void CmdPrintIndex(int code);
 void CmdHtml(int code);
-void InsertBookmark(char *name, char *text);
+void InsertBookmarkHidden(char *name, char *text, int hidden);
 void InsertContentMark(char marker, char *s1, char *s2, char *s3);
 void CmdCite(int code);
 void CmdHarvardCite(int code);
 void CmdBCAY(int code);
 void CmdApaCite(int code);
 void set_longnamesfirst(void);
+
+static inline void InsertBookmark(char *name, char *text)
+{
+    InsertBookmarkHidden(name, text, 0);
+}
+
 
 void set_current_ref(char *value);
 char * get_current_ref();

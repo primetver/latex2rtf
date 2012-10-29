@@ -759,7 +759,7 @@ static void RecordBookmark(char *s)
     }
 }
 
-void InsertBookmark(char *name, char *text)
+void InsertBookmarkHidden(char *name, char *text, int hidden)
 {
     char *signet;
 
@@ -780,12 +780,18 @@ void InsertBookmark(char *name, char *text)
     } else {
         diagnostics(4, "bookmark %s being inserted around <%s>", signet, text);
         RecordBookmark(signet);
-        if (fields_use_REF())
+        if (fields_use_REF()) {
             fprintRTF("{\\*\\bkmkstart BM_%s}", signet);
+            if (hidden)
+                fprintRTF("{\\v ");
+        }
         /*fprintRTF("%s", text);*/
         ConvertString(text);
-        if (fields_use_REF())
+        if (fields_use_REF()) {
+            if (hidden)
+                fprintRTF("}");
             fprintRTF("{\\*\\bkmkend BM_%s}", signet);
+        }
     }
 
     safe_free(signet);
@@ -825,7 +831,7 @@ void CmdLabel(int code)
                 g_equation_label = strdup(text); /* was strdup_nobadchars(text); */
                 diagnostics(4, "equation label is <%s>", text);
             } else
-                InsertBookmark(text, g_current_ref);
+                InsertBookmarkHidden(text, g_current_ref, 1); /* associated ref value inserted as hidden text*/
             break;
 
         case LABEL_HYPERREF:

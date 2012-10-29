@@ -1047,7 +1047,7 @@ void CmdItem(int code)
            this routine will get called recursively.
  ******************************************************************************/
 {
-    char *itemlabel, thechar;
+    char *itemlabel, *roman, thechar;
     static int item_number[5];
     int vspace;
 
@@ -1088,8 +1088,6 @@ void CmdItem(int code)
         fprintRTF("}");
         if (code != DESCRIPTION_MODE && code != INPARAENUM_MODE)
             fprintRTF("\\tab\n");
-
-        set_current_ref(itemlabel);
     }
 
     switch (code) {
@@ -1106,41 +1104,52 @@ void CmdItem(int code)
         case ENUMERATE_MODE:
             if (itemlabel) 
                 break;
+            
+            itemlabel = malloc(20);
+            itemlabel[0] = '\0';
+            
             if (ESKDMode && ( g_enumerate_depth == 1 )) {
                 /* Russian letters generation for item number */
                 if (item_number[g_enumerate_depth] > 0 && item_number[g_enumerate_depth] <= 25) {
-                    ConvertString(ru_alpha[item_number[g_enumerate_depth] - 1].s);
-                    set_current_ref(ru_alpha[item_number[g_enumerate_depth] - 1].s);
-                } else if (item_number[g_enumerate_depth] > 25){
-                    fprintRTF("%d", item_number[g_enumerate_depth] - 25);
+                    snprintf(itemlabel, 20, "%s", ru_alpha[item_number[g_enumerate_depth] - 1].s);
+                } else if (item_number[g_enumerate_depth] > 25) {
+                    snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth] - 25);
                 } else {
-                    fprintRTF("%d", item_number[g_enumerate_depth]);
+                    snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth]);
                 }
+                ConvertString(itemlabel);
                 fprintRTF(")");
-            }
-	    else if (RussianMode)
-                fprintRTF("%d)", item_number[g_enumerate_depth]);
-	    else
-		switch (g_enumerate_depth) {
-		    case 1:
-			fprintRTF("%d.", item_number[g_enumerate_depth]);
-			break;
+            } else if (RussianMode) {
+                snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth]);
+                fprintRTF("%s)", itemlabel);
+            } else
+                switch (g_enumerate_depth) {
+                    case 1:
+                        snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth]);
+                        fprintRTF("%s.", itemlabel);
+                        break;
 
-		    case 2:
-			fprintRTF("(%c)", 'a' + item_number[g_enumerate_depth] - 1);
-			break;
+                    case 2:
+                        snprintf(itemlabel, 20, "%c", 'a' + item_number[g_enumerate_depth] - 1);
+                        fprintRTF("(%s)", itemlabel);
+                        break;
 
-		    case 3:
-			fprintRTF("%s.", roman_item(item_number[g_enumerate_depth], FALSE));
-			break;
+                    case 3:
+                        roman = roman_item(item_number[g_enumerate_depth], FALSE);
+                        snprintf(itemlabel, 20, "%s", roman);
+                        fprintRTF("%s.", itemlabel);
+                        free(roman);
+                        break;
 
-		    case 4:
-			fprintRTF("%c.", 'A' + item_number[g_enumerate_depth] - 1);
-			break;
-		    
-		    default:
-			break;
-		}
+                    case 4:
+                        snprintf(itemlabel, 20, "%c", 'A' + item_number[g_enumerate_depth] - 1);
+                        fprintRTF("%s.", itemlabel);
+                        break;
+
+                    default:
+                        break;
+                }
+             
             if (code != INPARAENUM_MODE)
                 fprintRTF("\\tab\n");
             else
@@ -1153,9 +1162,10 @@ void CmdItem(int code)
             fprintRTF(" ");
             break;
     }
+    
+    set_current_ref(itemlabel);
+    safe_free(itemlabel);
 
-    if (itemlabel)
-        free(itemlabel);
     thechar = getNonBlank();
     ungetTexChar(thechar);
     
