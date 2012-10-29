@@ -56,8 +56,6 @@ Authors:
 #define ALPHA_NUMBERING  1
 #define ROMAN_NUMBERING  2
 
-char *roman_item(int n, int upper);
-
 static int g_chapter_numbering = ARABIC_NUMBERING;
 static int g_section_numbering = ARABIC_NUMBERING;
 static int g_appendix = 0;
@@ -101,6 +99,79 @@ static ru_alpha_type ru_alpha[] = {
 
 int g_processing_list_environment = FALSE;
 int g_hspace_in_list_environment = 0;
+
+/* convert integer to roman number --- only works up correctly up to 39 */
+static char *roman_item(int n, int upper)
+{
+    char s[50];
+    int i = 0;
+    
+    while (n >= 10) {
+        n -= 10;
+        s[i] = (upper) ? 'X' : 'x';
+        i++;
+    }
+    
+    if (n == 9) {
+        s[i] = (upper) ? 'I' : 'i';
+        i++;
+        s[i] = (upper) ? 'X' : 'x';
+        i++;
+        s[i] = '\0';
+        return strdup(s);
+    }
+    if (n >= 5) {
+        n -= 5;
+        s[i] = (upper) ? 'V' : 'v';
+        i++;
+    }
+    if (n == 4) {
+        s[i] = (upper) ? 'I' : 'i';
+        i++;
+        s[i] = (upper) ? 'V' : 'v';
+        i++;
+        s[i] = '\0';
+        return strdup(s);
+    }
+    while (n >= 1) {
+        n -= 1;
+        s[i] = (upper) ? 'I' : 'i';
+        i++;
+    }
+    
+    s[i] = '\0';
+    return strdup(s);
+}
+
+static char *alpha_item(int n, int upper)
+{
+    char s[20];
+    
+    if (RussianMode)
+        if (n > 0 && n <= 25) 
+            if (upper)
+                snprintf(s, 20, "%s", ru_alpha[n-1].c);
+            else
+                snprintf(s, 20, "%s", ru_alpha[n-1].s);
+            else if (n > 25) 
+                snprintf(s, 20, "%d", n-25);
+            else
+                snprintf(s, 20, "%d", n);
+            else if (upper)
+                snprintf(s, 20, "%c", 'A' + n - 1);
+            else
+                snprintf(s, 20, "%c", 'a' + n - 1);
+            
+            
+            return strdup(s);
+}
+
+static char *arabic_item(int n)
+{
+    char s[20];
+    snprintf(s, 20, "%d", n);
+}
+
 
 void CmdNewDef(int code)
 
@@ -376,16 +447,7 @@ static char *FormatNumber(int formatting, int n)
     switch (formatting) {
     
         case ALPHA_NUMBERING:
-	    if (RussianMode)
-	      snprintf(label, 20, "%c", (char) (n + (int) 'A' - 1) );
-	    /*  not work yet 
-		if (n > 26)
-		snprintf(label, 20, "%d%c", (int)n/26,  ru_alpha[(n%26)-1][1]);
-	      else
-		snprintf(label, 20, "%c", (int)ru_alpha[n-1][1]); */
-	    else
-	      snprintf(label, 20, "%c", (char) (n + (int) 'A' - 1) );
-            break;
+	    return alpha_item(n, TRUE);
     
         case ARABIC_NUMBERING:
             snprintf(label, 20, "%d", n);
@@ -512,8 +574,8 @@ void CmdSection(int code)
 {
     char *toc_entry;
     char *heading;
-    char *unit_label;
-    char *chapter_name=NULL;
+    char *unit_label = NULL;
+    char *unit_name = NULL;
     
     int amount = 700; /* orig was 600 NI*/
     int hspace, orig_indent, orig_left_margin;
@@ -545,7 +607,6 @@ void CmdSection(int code)
                 incrementCounter("part");
                 unit_label = FormatUnitNumber("part");
                 fprintRTF(" %s\\par ", unit_label);
-                free(unit_label);
             }
             ConvertString(heading);
             CmdEndParagraph(0);
@@ -554,14 +615,13 @@ void CmdSection(int code)
 
         case SECT_CHAPTER:
         case SECT_CHAPTER_STAR:
-            unit_label = NULL;
             if (getCounter("chapter") > 0) CmdNewPage(NewPage);
             startParagraph("chapter0", PARAGRAPH_SECTION_TITLE);
-            if (g_appendix)
-            	chapter_name=GetBabelName("APPENDIXNAME");
+            if (g_appendix && !ESKDMode)
+                unit_name=GetBabelName("APPENDIXNAME");
             else
-            	chapter_name=GetBabelName("CHAPTERNAME");
-            ConvertString(chapter_name);
+                unit_name=GetBabelName("CHAPTERNAME");
+            ConvertString(unit_name);
             if (code == SECT_CHAPTER && getCounter("secnumdepth") >= -1) {
                 incrementCounter("chapter");
                 setCounter("section", 0);
@@ -578,9 +638,8 @@ void CmdSection(int code)
             startParagraph("chapter", PARAGRAPH_SECTION_TITLE);
             ConvertString(heading);
             CmdEndParagraph(0);
-/*            InsertContentMark('c', chapter_name, " ", unit_label, " ", heading);*/
+/*            InsertContentMark('c', unit_name, " ", unit_label, " ", heading);*/
             CmdVspace(VSPACE_BIG_SKIP);
-            if (unit_label) free(unit_label);
             break;
 
         case SECT_NORM:
@@ -588,9 +647,13 @@ void CmdSection(int code)
             CmdVspace(VSPACE_BIG_SKIP);
 	    if (g_document_type == FORMAT_APA) {
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
-            } else {            
+            } else {                 
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
-            
+                if (g_appendix && ESKDMode) {
+                    unit_name = GetBabelName("APPENDIXNAME");
+                    ConvertString(unit_name);
+                    fprintRTF(" ");
+                }     
                 if (code == SECT_NORM && getCounter("secnumdepth") >= 0) {
                     incrementCounter("section");
                     setCounter("subsection", 0);
@@ -598,24 +661,23 @@ void CmdSection(int code)
                     unit_label = FormatUnitNumber("section");
                     InsertBookmark(g_section_label, unit_label);
                     fprintRTF("  ");
-                    free(unit_label);
                 }
             }
             ConvertString(heading);
             CmdEndParagraph(0);
             CmdVspace(VSPACE_MEDIUM_SKIP);
-	    break;
+            break;
 
         case SECT_SUB:
         case SECT_SUB_STAR:
             CmdVspace(VSPACE_BIG_SKIP);
-	    if (g_document_type == FORMAT_APA) {
+            if (g_document_type == FORMAT_APA) {
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
             } else {
-		if (RussianMode) {
-		    setLength("parindent", -amount);
-		    setLeftMarginIndent(orig_left_margin + hspace);
-		}
+                if (RussianMode) {
+                    setLength("parindent", -amount);
+                    setLeftMarginIndent(orig_left_margin + hspace);
+                }
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
                 if (code == SECT_SUB && getCounter("secnumdepth") >= 1) {
                     incrementCounter("subsection");
@@ -624,7 +686,6 @@ void CmdSection(int code)
                     unit_label = FormatUnitNumber("subsection");
                     InsertBookmark(g_section_label, unit_label);
                     fprintRTF("\\tab\n");
-                    free(unit_label);
 		}
             }
             ConvertString(heading);
@@ -656,7 +717,6 @@ void CmdSection(int code)
                     unit_label = FormatUnitNumber("subsubsection");
                     InsertBookmark(g_section_label, unit_label);
                     fprintRTF("\\tab\n");
-                    free(unit_label);
                 }
                 ConvertString(heading);
                 CmdEndParagraph(0);
@@ -679,7 +739,6 @@ void CmdSection(int code)
                 setCounter("subparagraph", 0);
                 InsertBookmark(g_section_label, unit_label);
                 fprintRTF("  ");
-                free(unit_label);
             }
             ConvertString(heading);
             CmdEndParagraph(0);
@@ -700,7 +759,6 @@ void CmdSection(int code)
                 unit_label = FormatUnitNumber("subparagraph");
                 InsertBookmark(g_section_label, unit_label);
                 fprintRTF("  ");
-                free(unit_label);
             }
             ConvertString(heading);
             CmdEndParagraph(0);
@@ -711,9 +769,9 @@ void CmdSection(int code)
     /* orig para & left margin indents may be changed, restore it */
     setLength("parindent", orig_indent);
     setLeftMarginIndent(orig_left_margin);
-
-    if (heading)
-        free(heading);
+    
+    safe_free(unit_label);
+    safe_free(heading);
     if (g_section_label) {
         free(g_section_label);
         g_section_label = NULL;
@@ -863,6 +921,36 @@ void CmdCounter(int code)
     }
 
     free(s);
+}
+
+
+void CmdAlphaRoman(int code)
+{
+    char *s, *val;
+    s = getBraceParam();
+    
+    if (getTexMode() == MODE_VERTICAL)
+        changeTexMode(MODE_HORIZONTAL);
+    
+    switch (code) {
+        case ALPHA_UPPER:
+            val = alpha_item(getCounter(s), TRUE);
+            break;
+        case ALPHA_LOWER:
+            val = alpha_item(getCounter(s), FALSE);
+            break;
+        case ROMAN_UPPER:
+            val = roman_item(getCounter(s), TRUE);
+            break;
+        case ROMAN_LOWER:
+            val = roman_item(getCounter(s), FALSE);
+            break;
+        default:
+            val = NULL;
+    }
+    
+    ConvertString(val);
+    safe_free(val);
 }
 
 void CmdLength(int code)
@@ -1047,7 +1135,7 @@ void CmdItem(int code)
            this routine will get called recursively.
  ******************************************************************************/
 {
-    char *itemlabel, *roman, thechar;
+    char *itemlabel, thechar;
     static int item_number[5];
     int vspace;
 
@@ -1105,44 +1193,34 @@ void CmdItem(int code)
             if (itemlabel) 
                 break;
             
-            itemlabel = malloc(20);
-            itemlabel[0] = '\0';
-            
             if (ESKDMode && ( g_enumerate_depth == 1 )) {
-                /* Russian letters generation for item number */
-                if (item_number[g_enumerate_depth] > 0 && item_number[g_enumerate_depth] <= 25) {
-                    snprintf(itemlabel, 20, "%s", ru_alpha[item_number[g_enumerate_depth] - 1].s);
-                } else if (item_number[g_enumerate_depth] > 25) {
-                    snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth] - 25);
-                } else {
-                    snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth]);
-                }
+                itemlabel = alpha_item(item_number[g_enumerate_depth], FALSE);
                 ConvertString(itemlabel);
                 fprintRTF(")");
+                
             } else if (RussianMode) {
-                snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth]);
+                itemlabel = arabic_item(item_number[g_enumerate_depth]);
                 fprintRTF("%s)", itemlabel);
+                
             } else
                 switch (g_enumerate_depth) {
                     case 1:
-                        snprintf(itemlabel, 20, "%d", item_number[g_enumerate_depth]);
+                        itemlabel = arabic_item(item_number[g_enumerate_depth]);
                         fprintRTF("%s.", itemlabel);
                         break;
 
                     case 2:
-                        snprintf(itemlabel, 20, "%c", 'a' + item_number[g_enumerate_depth] - 1);
+                        itemlabel = alpha_item(item_number[g_enumerate_depth], FALSE);
                         fprintRTF("(%s)", itemlabel);
                         break;
 
                     case 3:
-                        roman = roman_item(item_number[g_enumerate_depth], FALSE);
-                        snprintf(itemlabel, 20, "%s", roman);
+                        itemlabel = roman_item(item_number[g_enumerate_depth], FALSE);
                         fprintRTF("%s.", itemlabel);
-                        free(roman);
                         break;
 
                     case 4:
-                        snprintf(itemlabel, 20, "%c", 'A' + item_number[g_enumerate_depth] - 1);
+                        itemlabel = alpha_item(item_number[g_enumerate_depth], TRUE);
                         fprintRTF("%s.", itemlabel);
                         break;
 
@@ -1975,6 +2053,7 @@ void CmdTitlepage(int code)
     CmdNewPage(NewPage);
 }
 
+
 void CmdMinipage(int code)
 
 /******************************************************************************
@@ -2039,50 +2118,6 @@ void CmdVerbosityLevel(int code)
 
 }
 
-
-/* convert integer to roman number --- only works up correctly up to 39 */
-
-char *roman_item(int n, int upper)
-{
-    char s[50];
-    int i = 0;
-
-    while (n >= 10) {
-        n -= 10;
-        s[i] = (upper) ? 'X' : 'x';
-        i++;
-    }
-
-    if (n == 9) {
-        s[i] = (upper) ? 'I' : 'i';
-        i++;
-        s[i] = (upper) ? 'X' : 'x';
-        i++;
-        s[i] = '\0';
-        return strdup(s);
-    }
-    if (n >= 5) {
-        n -= 5;
-        s[i] = (upper) ? 'V' : 'v';
-        i++;
-    }
-    if (n == 4) {
-        s[i] = (upper) ? 'I' : 'i';
-        i++;
-        s[i] = (upper) ? 'V' : 'v';
-        i++;
-        s[i] = '\0';
-        return strdup(s);
-    }
-    while (n >= 1) {
-        n -= 1;
-        s[i] = (upper) ? 'I' : 'i';
-        i++;
-    }
-
-    s[i] = '\0';
-    return strdup(s);
-}
 
 void CmdNonBreakSpace(int code)
 {

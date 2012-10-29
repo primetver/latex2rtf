@@ -97,6 +97,13 @@ void CmdList(int code);
 
 void CmdCounter(int code);
 
+#define ALPHA_UPPER      1
+#define ALPHA_LOWER      2
+#define ROMAN_UPPER      3
+#define ROMAN_LOWER      4
+
+void CmdAlphaRoman(int code);
+
 #define LENGTH_NEW   1
 #define LENGTH_SET   2
 #define LENGTH_ADD   3
