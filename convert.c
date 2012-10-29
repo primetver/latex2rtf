@@ -399,7 +399,7 @@ purpose: converts inputfile and writes result to outputfile
                     if ((cNext = getTexChar()) && cNext == '`') {
                         fprintRTF("\\'a1 ");
                     } else {
-                        fprintRTF("! ");
+                        fprintRTF("!"); /*fprintRTF("! ");*/
                         ungetTexChar(cNext);
                     }
                 }
@@ -410,7 +410,7 @@ purpose: converts inputfile and writes result to outputfile
                 if ((cNext = getTexChar()) && cNext == '`') {
                     fprintRTF("\\'bf ");
                 } else {
-                    fprintRTF("? ");
+                    fprintRTF("?"); /* fprintRTF("! "); */
                     ungetTexChar(cNext);
                 }
                 break;
@@ -434,11 +434,11 @@ purpose: converts inputfile and writes result to outputfile
                     changeTexMode(MODE_HORIZONTAL);
                     fprintRTF(".");
 
-                    /* try to simulate double spaces after sentences */
+                    /* try to simulate double spaces after sentences 
                     cNext = getTexChar();
                     if (0 && cNext == ' ' && (isalpha((int) cLast) && !isupper((int) cLast)))
                         fprintRTF(" ");
-                    ungetTexChar(cNext);
+                    ungetTexChar(cNext);*/
                 }
                 break;
 
