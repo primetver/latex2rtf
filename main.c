@@ -669,8 +669,8 @@ static void InitializeLatexLengths(void)
     setCounter("equation", 0);
     setCounter("footnote", 0);
     setCounter("mpfootnote", 0);
-    setCounter("secnumdepth", 2);
-    setCounter("tocdepth", 2);
+    setCounter("secnumdepth", 3);
+    setCounter("tocdepth", 3);
     setCounter("endfloatfigure", 0);
     setCounter("endfloattable", 0);
 
@@ -700,8 +700,8 @@ static void InitializeLatexLengths(void)
     setLength("marginparsep", 10 * 20);
 
     /* Set up deafults for RTF conversion */
-    setCounter("RTFtrpaddb", 60);       /* table cell bottom magrin in twips */
-    setCounter("RTFtrpaddt", 60);       /* table cell top magrin in twips */
+    setCounter("RTFtrpaddb", 0);        /* table cell bottom magrin in twips */
+    setCounter("RTFtrpaddt", 0);        /* table cell top magrin in twips */
     setCounter("RTFtrpaddl", 130);      /* table cell left magrin in twips */
     setCounter("RTFtrpaddr", 130);      /* table cell right magrin in twips */
     setCounter("RTFheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */

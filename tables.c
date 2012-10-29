@@ -289,7 +289,7 @@ static void BeginCellRTF(char align)
  ******************************************************************************/
 {
     g_processing_cell = TRUE;
-    fprintRTF("{\\pard\\intbl");
+    fprintRTF("{\\pard\\intbl\\plain");
     if (g_processing_tabular)
         InsertStyle("tabular");
     else if (g_processing_tabbing)
