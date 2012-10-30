@@ -164,8 +164,8 @@ void preParse(char **body, char **header, char **label)
     int any_possible_match, found;
     char cNext, cThis, *s, *text, *next_header, *str, *p;
     int i;
-    int possible_match[51];
-    char *command[51] = { "",   /* 0 entry is for user definitions */
+    int possible_match[52];
+    char *command[52] = { "",   /* 0 entry is for user definitions */
         "",                     /* 1 entry is for user environments */
         "\\begin{verbatim}", 
         "\\begin{figure}",      "\\begin{figure*}", 
@@ -184,12 +184,12 @@ void preParse(char **body, char **header, char **label)
         "\\end{itemize}",       "\\end{enumerate}",
         "\\end{description}",   "\\end{comment}",
         "\\part", "\\chapter",  "\\section", "\\subsection", "\\subsubsection",
-        "\\section*", "\\subsection*", "\\subsubsection*",
+        "\\section*", "\\subsection*", "\\subsubsection*", "\\ESKDappendix",
         "\\label", "\\input", "\\include", "\\verb", "\\url", "\\nolinkurl",
         "\\newcommand", "\\def", "\\renewcommand", "\\endinput", "\\end{document}",
     };
 
-    int ncommands = 51;
+    int ncommands = 52;
 
     const int b_verbatim_item = 2;
     const int b_figure_item = 3;
@@ -222,18 +222,20 @@ void preParse(char **body, char **header, char **label)
     const int e_description_item = 30;
     const int e_comment_item = 31;
 
-    const int label_item = 40;
-    const int input_item = 41;
-    const int include_item = 42;
+    const int eskd_appendix = 40;
     
-    const int verb_item = 43;
-    const int url_item = 44;
-    const int nolinkurl_item = 45;
-    const int new_item = 46;
-    const int def_item = 47;
-    const int renew_item = 48;
-    const int endinput_item = 49;
-    const int e_document_item = 50;
+    const int label_item = 41;
+    const int input_item = 42;
+    const int include_item = 43;
+    
+    const int verb_item = 44;
+    const int url_item = 45;
+    const int nolinkurl_item = 46;
+    const int new_item = 47;
+    const int def_item = 48;
+    const int renew_item = 49;
+    const int endinput_item = 50;
+    const int e_document_item = 51;
 
     int bs_count = 0;          /* number of backslashes encountered in a row */
     size_t cmd_pos = 0;        /* position of start of command relative to end of buffer */
@@ -613,7 +615,16 @@ void preParse(char **body, char **header, char **label)
         diagnostics(4, "preParse() found command to end section");
         s = getBraceParam();
         next_header = strdup_together4(command[i], "{", s, "}");
-        free(s);
+        safe_free(s);
+
+        if (i_match == eskd_appendix) {
+            /* add second parameter */
+            char *s1 = next_header;
+            s = getBraceParam();
+            next_header = strdup_together4(s1, "{", s, "}");
+            safe_free (s);
+            free (s1);
+        }
 
         move_end_of_buffer(-strlen(command[i]));
         add_chr_to_buffer('\0');

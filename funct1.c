@@ -832,6 +832,11 @@ void CmdCaption(int code)
     if (g_document_type != FORMAT_ARTICLE &&
         g_document_type != FORMAT_APA)
         snprintf(number, 20, "%d.%d", getCounter("chapter"), n);
+    else if (g_appendix) {
+        char *apx = alpha_item(getCounter("section"), TRUE);
+        snprintf(number, 20, "%s.%d", apx, n);
+        free (apx);
+    }
     else
         snprintf(number, 20, "%d", n);
 
@@ -842,7 +847,7 @@ void CmdCaption(int code)
         InsertBookmark(g_table_label, number);
 
     else
-        fprintRTF("%s", number);
+        ConvertString(number);
 
     if (ESKDMode)
       fprintRTF(" \\endash\n ");
@@ -2638,6 +2643,9 @@ void CmdESKDappendix(int code)
     if (getCounter("secnumdepth") >= 0) {
         incrementCounter("section");
         setCounter("subsection", 0);
+        setCounter("figure",0);
+        setCounter("table",0);
+        setCounter("equation",0);
         resetTheoremCounter("section");
         unit_label = FormatUnitNumber("section");
         InsertBookmark(g_section_label, unit_label);
