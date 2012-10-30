@@ -491,6 +491,7 @@ static CommandArray PreambleCommands[] = {
     {"graphicspath",  CmdGraphicsPath, 0 },
     {"ESKDtheTitle",  CmdESKDtheTitle, 0 },
     {"ESKDtotal",  CmdESKDtotal, 0 },
+    {"ESKDappendix",  CmdESKDappendix, 0 },
     {"", NULL, 0}
 };                              /* end of list */
 

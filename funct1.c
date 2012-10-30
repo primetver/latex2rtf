@@ -2594,7 +2594,7 @@ void CmdLap(int code)
 
 
 /****************************************************************************
-purpose: writes the \ESKDtotal saved values
+ purpose: writes the \ESKDtotal saved values
  ****************************************************************************/
 void CmdESKDtotal(int code)
 {
@@ -2612,4 +2612,53 @@ void CmdESKDtotal(int code)
       free(cmd);
     }
     free(s);
+}
+
+/****************************************************************************
+ purpose: convert the \ESKDappendix to RTF
+ ****************************************************************************/
+void CmdESKDappendix(int code)
+{
+    if (!g_appendix)
+        /* start the appendix mode if we are not in */
+        CmdAppendix(0);
+
+    char *type = getBraceParam();
+    char *heading = getBraceParam();
+    char *unit_label = NULL;
+    char *unit_name = NULL;
+
+    CmdNewPage(NewPage);
+    startParagraph("section", PARAGRAPH_SECTION_TITLE);
+    fprintRTF("\\plain\\jc{\\b ");
+    unit_name = GetBabelName("APPENDIXNAME");
+    ConvertString(unit_name);
+    fprintRTF(" ");
+    
+    if (getCounter("secnumdepth") >= 0) {
+        incrementCounter("section");
+        setCounter("subsection", 0);
+        resetTheoremCounter("section");
+        unit_label = FormatUnitNumber("section");
+        InsertBookmark(g_section_label, unit_label);
+    }
+    fprintRTF("}");
+    if (type && strlen(type) != 0) {
+        fprintRTF("\\line (");
+        ConvertString(type);
+        fprintRTF(")");
+    }
+    fprintRTF("\\line{\\b ");
+    ConvertString(heading);
+    fprintRTF("}");
+    CmdEndParagraph(0);
+    CmdVspace(VSPACE_MEDIUM_SKIP);
+
+    safe_free(unit_label);
+    safe_free(heading);
+    safe_free(type);
+    if (g_section_label) {
+        free(g_section_label);
+        g_section_label = NULL;
+    }
 }

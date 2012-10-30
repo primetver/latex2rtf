@@ -201,4 +201,5 @@ void CmdAppendix(int code);
 void CmdAcronymItem(int code);
 void CmdLap(int code);
 void CmdESKDtotal(int code);
+void CmdESKDappendix(int code);
 
