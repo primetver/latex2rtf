@@ -90,7 +90,7 @@ static ru_alpha_type ru_alpha[] = {
     {"\\CYRF",	"\\cyrf"},
     {"\\CYRH",	"\\cyrh"},
     {"\\CYRC",	"\\cyrc"},
-    {"\\CYRSH",	"\\cyrch"},
+    {"\\CYRSH",	"\\cyrsh"},
     {"\\CYRSHCH",	"\\cyrshch"},
     {"\\CYREREV",	"\\cyrerev"},
     {"\\CYRYU",	"\\cyryu"},
@@ -2588,7 +2588,7 @@ void CmdTextColor(int code)
 
 /******************************************************************************
   purpose: parse \rlap{text} or \llap{text} , but ignore spacing changes
-******************************************************************************/
+ ******************************************************************************/
 void CmdLap(int code)
 {
     char *s = getBraceParam();
@@ -2596,6 +2596,68 @@ void CmdLap(int code)
     free(s);
 }
 
+
+/******************************************************************************
+  purpose: print nomenclature to RTF
+ ******************************************************************************/
+void CmdPrintnomenclature(int code)
+{
+    int err;
+    char *s = getBracketParam();
+    int saved_width = getLength("nomlabelwidth");
+
+    if (s && strlen(s) !=0) 
+        setLength("nomlabelwidth", getStringDimension(s));
+
+    safe_free(s);
+    
+    err = PushSource(g_nls_name, NULL);
+    if (!err) {
+        diagnostics(2, "CmdPrintNomanclature ... begin Convert()");
+        Convert();
+        diagnostics(2, "CmdPrintNomanclature ... done Convert()");
+        /*     PopSource();*/
+    } else
+        diagnostics(WARNING, "Cannot open nls file.  Create %s using MakeIndex", g_nls_name);
+
+    setLength("nomlabelwidth", saved_width);
+}
+
+
+/****************************************************************************
+  purpose: convert thenomenclature envirinment to RTF
+ ****************************************************************************/
+void CmdThenomenclature(int code)
+{
+    if (code & ON) {
+        diagnostics(4,"\\begin{thenomenclature}");
+        CmdEndParagraph(0);
+        startParagraph("section", PARAGRAPH_SECTION_TITLE);
+
+        int i = existsDefinition("nomname");    /* see if nomname has * been redefined */
+        if (i > -1) {
+            char *str = expandDefinition(i);
+            ConvertString(str);
+            safe_free(str);
+        } else {
+            ConvertBabelName("NOMNAME");
+        }
+        CmdEndParagraph(0);
+        CmdVspace(VSPACE_MEDIUM_SKIP);
+        PushEnvironment(ITEMIZE_MODE);          /* actually use list in itemize mode */
+        setVspace(getLength("topsep") + getLength("parskip"));
+        int amount = getLength("nomlabelwidth");
+        setLength("parindent", -amount);
+        setLeftMarginIndent(getLeftMarginIndent() + amount);
+        CmdIndent(INDENT_USUAL);
+    } else {
+        diagnostics(4,"\\end{thenomenclature}");
+        CmdEndParagraph(0);
+        PopEnvironment();
+        CmdIndent(INDENT_INHIBIT);
+        g_processing_list_environment = FALSE;
+    }
+}
 
 
 /****************************************************************************
@@ -2631,13 +2693,12 @@ void CmdESKDappendix(int code)
     char *type = getBraceParam();
     char *heading = getBraceParam();
     char *unit_label = NULL;
-    char *unit_name = NULL;
 
+    CmdEndParagraph(0);
     CmdNewPage(NewPage);
     startParagraph("section", PARAGRAPH_SECTION_TITLE);
     fprintRTF("\\plain\\jc{\\b ");
-    unit_name = GetBabelName("APPENDIXNAME");
-    ConvertString(unit_name);
+    ConvertBabelName("APPENDIXNAME");
     fprintRTF(" ");
     
     if (getCounter("secnumdepth") >= 0) {

@@ -61,6 +61,7 @@ extern          char *g_toc_name;
 extern          char *g_lof_name;
 extern          char *g_lot_name;
 extern          char *g_bbl_name;
+extern          char *g_nls_name;
 extern          char *g_home_dir;
 extern          char *progname;         /* name of the executable file */
 

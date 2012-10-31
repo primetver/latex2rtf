@@ -603,8 +603,8 @@ void CmdThebibliography(int code)
             fprintRTF("}");
             CmdEndParagraph(0);
         }
-        CmdVspace(VSPACE_SMALL_SKIP);
 
+        CmdVspace(VSPACE_MEDIUM_SKIP);
         PushEnvironment(BIBLIOGRAPHY_MODE);
         setLength("parindent", -amount);
         setLeftMarginIndent(getLeftMarginIndent() + amount);

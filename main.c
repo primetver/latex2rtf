@@ -69,6 +69,7 @@ char *g_lot_name = NULL;
 char *g_fff_name = NULL;
 char *g_ttt_name = NULL;
 char *g_bbl_name = NULL;
+char *g_nls_name = NULL;
 char *g_home_dir = NULL;
 
 char *progname;                /* name of the executable file */
@@ -170,13 +171,16 @@ int main(int argc, char **argv)
     InitializeLatexLengths();
     InitializeBibliography();
     
-    while ((c = my_getopt(argc, argv, "lhpuvFSVWZ:o:a:b:d:f:i:s:u:C:D:M:P:T:t:")) != EOF) {
+    while ((c = my_getopt(argc, argv, "lhpuvFSVWZ:o:a:b:n:d:f:i:s:u:C:D:M:P:T:t:")) != EOF) {
         switch (c) {
             case 'a':
                 g_aux_name = optarg;
                 break;
             case 'b':
                 g_bbl_name = optarg;
+                break;
+            case 'n':
+                g_nls_name = optarg;
                 break;
             case 'd':
                 g_verbosity_level = *optarg - '0';
@@ -351,6 +355,9 @@ int main(int argc, char **argv)
     if (g_bbl_name == NULL && basename != NULL)
         g_bbl_name = strdup_together(basename, ".bbl");
 
+    if (g_nls_name == NULL && basename != NULL)
+        g_nls_name = strdup_together(basename, ".nls");
+    
     if (g_toc_name == NULL && basename != NULL)
         g_toc_name = strdup_together(basename, ".toc");
 
@@ -371,6 +378,7 @@ int main(int argc, char **argv)
         diagnostics(2, "  rtf filename is <%s>", g_rtf_name);
         diagnostics(2, "  aux filename is <%s>", g_aux_name);
         diagnostics(2, "  bbl filename is <%s>", g_bbl_name);
+        diagnostics(2, "  nls filename is <%s>", g_nls_name);
         diagnostics(2, "home directory is <%s>", (g_home_dir) ? g_home_dir : "");
     }
 
@@ -502,6 +510,7 @@ static void print_usage(void)
     fprintf(stdout, "Options:\n");
     fprintf(stdout, "  -a auxfile       use LaTeX auxfile rather than input.aux\n");
     fprintf(stdout, "  -b bblfile       use BibTex bblfile rather than input.bbl\n");
+    fprintf(stdout, "  -n nlsfile       use MakeIndex nomenclature nlsfile rather than input.nls\n");
     fprintf(stdout, "  -C codepage      charset used by the latex document (latin1, cp850, raw, etc.)\n");
     fprintf(stdout, "  -d level         debugging output (level is 0-6)\n");
     fprintf(stdout, "  -f#              field handling\n");
@@ -698,6 +707,7 @@ static void InitializeLatexLengths(void)
     setLength("bigskipamount", 12 * 20);
 
     setLength("marginparsep", 10 * 20);
+    setLength("nomlabelwidth", 1400); /* app 2,5cm */
 
     /* Set up deafults for RTF conversion */
     setCounter("RTFtrpaddb", 0);        /* table cell bottom magrin in twips */

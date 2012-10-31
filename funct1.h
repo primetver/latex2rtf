@@ -200,6 +200,8 @@ int  TryConditionSet(char *command);
 void CmdAppendix(int code);
 void CmdAcronymItem(int code);
 void CmdLap(int code);
+void CmdPrintnomenclature(int code);
+void CmdThenomenclature(int code);
 void CmdESKDtotal(int code);
 void CmdESKDappendix(int code);
 
