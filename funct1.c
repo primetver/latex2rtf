@@ -163,13 +163,14 @@ static char *alpha_item(int n, int upper)
                 snprintf(s, 20, "%c", 'a' + n - 1);
             
             
-            return strdup(s);
+    return strdup(s);
 }
 
 static char *arabic_item(int n)
 {
     char s[20];
     snprintf(s, 20, "%d", n);
+    return strdup(s);
 }
 
 
@@ -629,7 +630,7 @@ void CmdSection(int code)
                 setCounter("equation",0);
                 resetTheoremCounter("chapter");
                 unit_label = FormatUnitNumber("chapter");
-                fprintRTF(" ");
+                fprintRTF("\\emspace ");
                 InsertBookmark(g_section_label, unit_label);
             }
             CmdEndParagraph(0);
@@ -651,7 +652,7 @@ void CmdSection(int code)
                 if (g_appendix && ESKDMode) {
                     unit_name = GetBabelName("APPENDIXNAME");
                     ConvertString(unit_name);
-                    fprintRTF(" ");
+                    fprintRTF("\\emspace ");
                 }     
                 if (code == SECT_NORM && getCounter("secnumdepth") >= 0) {
                     incrementCounter("section");
@@ -659,12 +660,12 @@ void CmdSection(int code)
                     resetTheoremCounter("section");
                     unit_label = FormatUnitNumber("section");
                     InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("  ");
+                    fprintRTF("\\emspace ");
                 }
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_MEDIUM_SKIP);
+            CmdVspace(VSPACE_BIG_SKIP);
             break;
 
         case SECT_SUB:
@@ -673,7 +674,7 @@ void CmdSection(int code)
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
             } else {
-                if (RussianMode) {
+                if (code == SECT_SUB && RussianMode) {
                     setLength("parindent", -amount);
                     setLeftMarginIndent(orig_left_margin + hspace);
                 }
@@ -684,8 +685,8 @@ void CmdSection(int code)
                     resetTheoremCounter("subsection");
                     unit_label = FormatUnitNumber("subsection");
                     InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("\\tab\n");
-		}
+                    fprintRTF("\\tab ");
+                }
             }
             ConvertString(heading);
             CmdEndParagraph(0);
@@ -701,10 +702,10 @@ void CmdSection(int code)
                 ConvertString(heading);
                 fprintRTF(".} ");
             } else {
-	      	if (RussianMode) {
-		    setLength("parindent", -amount);
-		    setLeftMarginIndent(orig_left_margin + hspace);
-		}
+                if (code == SECT_SUBSUB && RussianMode) {
+                    setLength("parindent", -amount);
+                    setLeftMarginIndent(orig_left_margin + hspace);
+                }
                 startParagraph("subsubsection", PARAGRAPH_SECTION_TITLE);
                 
                 if (code == SECT_SUBSUB && (getCounter("secnumdepth") > 2 ||
@@ -715,7 +716,7 @@ void CmdSection(int code)
                     resetTheoremCounter("subsubsection");
                     unit_label = FormatUnitNumber("subsubsection");
                     InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("\\tab\n");
+                    fprintRTF("\\tab ");
                 }
                 ConvertString(heading);
                 CmdEndParagraph(0);
@@ -726,7 +727,7 @@ void CmdSection(int code)
         case SECT_SUBSUBSUB:
         case SECT_SUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
-            if (RussianMode) {
+            if (code == SECT_SUBSUBSUB && RussianMode) {
                 setLength("parindent", -amount);
                 setLeftMarginIndent(orig_left_margin + hspace);
             }
@@ -737,7 +738,7 @@ void CmdSection(int code)
                 unit_label = FormatUnitNumber("paragraph");
                 setCounter("subparagraph", 0);
                 InsertBookmark(g_section_label, unit_label);
-                fprintRTF("  ");
+                fprintRTF("\\emspace ");
             }
             ConvertString(heading);
             CmdEndParagraph(0);
@@ -747,17 +748,17 @@ void CmdSection(int code)
         case SECT_SUBSUBSUBSUB:
         case SECT_SUBSUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
-	    if (RussianMode) {
-		    setLength("parindent", -amount);
-		    setLeftMarginIndent(orig_left_margin + hspace);
-	    }
+            if (code == SECT_SUBSUBSUBSUB && RussianMode) {
+                setLength("parindent", -amount);
+                setLeftMarginIndent(orig_left_margin + hspace);
+        }
             startParagraph("subparagraph", PARAGRAPH_SECTION_TITLE);
             if (code == SECT_SUBSUBSUBSUB && getCounter("secnumdepth") >= 4) {
                 incrementCounter("subparagraph");
                 resetTheoremCounter("subparagraph");
                 unit_label = FormatUnitNumber("subparagraph");
                 InsertBookmark(g_section_label, unit_label);
-                fprintRTF("  ");
+                fprintRTF("\\emspace ");
             }
             ConvertString(heading);
             CmdEndParagraph(0);
@@ -1064,12 +1065,16 @@ void CmdList(int code)
     int vspace, hspace;
     int amount = getCounter("RTFamount");
 
-    if (g_processing_cell)
+    if (g_processing_cell) {
         hspace = amount;
-    else if (g_processing_list_environment == FALSE)
+        vspace = getLength("topsep");
+    } else if (g_processing_list_environment == FALSE) {
         hspace = getLength("parindent") + amount;
-    else
-        hspace = 2 * amount; 
+        vspace = getVspace() + getLength("topsep") + getLength("parskip");
+    } else {
+        hspace = 2 * amount;
+        vspace = getLength("topsep") + getLength("parskip");
+    }
   
     vspace = getLength("topsep") + getLength("parskip");
    
@@ -1157,18 +1162,20 @@ void CmdItem(int code)
        (code==DESCRIPTION_MODE)?"description":
        (code==INPARAENUM_MODE)?"inparaenum":"not enum");
 
-    g_processing_list_environment = TRUE;
-
     /* suppress vertical space for inparaenum */
     if (code != INPARAENUM_MODE) {
         CmdEndParagraph(0);
-        vspace = getLength("itemsep") + getLength("parsep");
-        setVspace(vspace);
+        if (g_processing_list_environment) {
+            vspace = getLength("itemsep") + getLength("parsep");
+            setVspace(vspace);
+        }
 
         CmdIndent(INDENT_USUAL);
         startParagraph("item", PARAGRAPH_LIST);
     }
 
+    g_processing_list_environment = TRUE;
+    
     itemlabel = getBracketParam();
     if (itemlabel) {            /* \item[label] */
         fprintRTF("{");
@@ -2631,6 +2638,7 @@ void CmdThenomenclature(int code)
     if (code & ON) {
         diagnostics(4,"\\begin{thenomenclature}");
         CmdEndParagraph(0);
+        CmdVspace(VSPACE_BIG_SKIP);
         startParagraph("section", PARAGRAPH_SECTION_TITLE);
 
         int i = existsDefinition("nomname");    /* see if nomname has * been redefined */
@@ -2642,9 +2650,8 @@ void CmdThenomenclature(int code)
             ConvertBabelName("NOMNAME");
         }
         CmdEndParagraph(0);
-        CmdVspace(VSPACE_MEDIUM_SKIP);
+        CmdVspace(VSPACE_BIG_SKIP);
         PushEnvironment(ITEMIZE_MODE);          /* actually use list in itemize mode */
-        setVspace(getLength("topsep") + getLength("parskip"));
         int amount = getLength("nomlabelwidth");
         setLength("parindent", -amount);
         setLeftMarginIndent(getLeftMarginIndent() + amount);
@@ -2720,8 +2727,8 @@ void CmdESKDappendix(int code)
     ConvertString(heading);
     fprintRTF("}");
     CmdEndParagraph(0);
-    CmdVspace(VSPACE_MEDIUM_SKIP);
-
+    CmdVspace(VSPACE_BIG_SKIP);
+    
     safe_free(unit_label);
     safe_free(heading);
     safe_free(type);

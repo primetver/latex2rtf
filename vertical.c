@@ -394,8 +394,8 @@ void startParagraph(const char *style, int indenting)
         fprintRTF("\\pard\\intbl");  
     }
 
-    if (next_no_vskip == TRUE)
-	/* redefine style - use zero extra space after section titles */
+    if (next_no_vskip == TRUE && indenting == PARAGRAPH_SECTION_TITLE)
+	/* redefine style - use zero extra space before section titles after previous section titles */
 	fprintRTF("\\sb0 "); 
     else {
 	if (getVspace() > 0)

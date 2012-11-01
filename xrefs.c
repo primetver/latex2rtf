@@ -576,7 +576,7 @@ void CmdThebibliography(int code)
         safe_free(s);
 
         CmdEndParagraph(0);
-        CmdVspace(VSPACE_MEDIUM_SKIP);
+        CmdVspace(VSPACE_BIG_SKIP);
 
         if (g_document_type == FORMAT_APA) {
             ConvertString("\\begin{center}{\\bf");
@@ -604,7 +604,7 @@ void CmdThebibliography(int code)
             CmdEndParagraph(0);
         }
 
-        CmdVspace(VSPACE_MEDIUM_SKIP);
+        CmdVspace(VSPACE_BIG_SKIP);
         PushEnvironment(BIBLIOGRAPHY_MODE);
         setLength("parindent", -amount);
         setLeftMarginIndent(getLeftMarginIndent() + amount);
