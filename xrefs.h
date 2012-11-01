@@ -118,6 +118,7 @@ void CmdBibStyle(int code);
 void CmdBibliography(int code);
 void CmdThebibliography(int code);
 void CmdBibitem(int code);
+void CmdSelectlanguageifdefined(int code);
 void CmdNewblock(int code);
 void CmdIndex(int code);
 void CmdPrintIndex(int code);

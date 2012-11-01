@@ -636,9 +636,9 @@ void CmdBibitem(int code)
 
     if (label && !s) {          /* happens when file needs to be latex'ed again */
         if (!g_warned_once){
-        diagnostics(WARNING, "Cannot locate \\bibcite{%s} in .aux file",key);
-        diagnostics(WARNING, "**** The .tex file probably needs to be LaTeXed again ***");
-        g_warned_once = TRUE;
+            diagnostics(WARNING, "Cannot locate \\bibcite{%s} in .aux file",key);
+            diagnostics(WARNING, "**** The .tex file probably needs to be LaTeXed again ***");
+            g_warned_once = TRUE;
         }
         fprintRTF("[");
         ConvertString(label);
@@ -646,7 +646,7 @@ void CmdBibitem(int code)
     } else {
         diagnostics(4, "CmdBibitem <%s>", s);
         if (g_document_bibstyle == BIBSTYLE_STANDARD ||
-            (g_document_bibstyle == BIBSTYLE_NATBIB && g_bibpunct_style != BIB_STYLE_ALPHA)) {
+           (g_document_bibstyle == BIBSTYLE_NATBIB && g_bibpunct_style != BIB_STYLE_ALPHA)) {
             fprintRTF("%s", g_bibstyle_punct[0]);
             fprintRTF("{\\v\\*\\bkmkstart BIB_%s}", signet);
             ConvertString(s);
@@ -657,15 +657,20 @@ void CmdBibitem(int code)
         /* else emit nothing for APALIKE */
     }
 
-    if (s)
-        safe_free(s);
-    if (label)
-        safe_free(label);
+    safe_free(s);
+    safe_free(label);
     safe_free(signet);
     safe_free(key);
 
-    c = getNonBlank();
-    ungetTexChar(c);
+    skipWhiteSpace();
+}
+
+void CmdSelectlanguageifdefined(int code)
+{
+    /* now only ignore the command and all white spaces after
+     need to add code for set current language in RTF properly */
+    safe_free(getBraceParam());
+    skipWhiteSpace();
 }
 
 /******************************************************************************

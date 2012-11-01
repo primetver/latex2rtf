@@ -1617,14 +1617,10 @@ void CmdMultiCol(int code)
 
 void CmdHline(int code)
 {
-
-/* cline and hline are already handled by tabular code 
-   here we just properly skip the commands             */
-    char *s;
-
+    /* cline and hline are already handled by tabular code 
+    here we just properly skip the commands             */
     if (code == 1) {
-        s = getBraceParam();
-        free(s);
+        safe_free(getBraceParam());
         skipWhiteSpace();
     }
 }

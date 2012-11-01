@@ -201,7 +201,8 @@ void CmdNewDef(int code)
         opt_param = NULL;
         def = getBraceParam();
         UpdateLineNumber(def);
-        newDefinition(name + 1, opt_param, def, param);
+        if (strcmp(name, "\\selectlanguageifdefined") != 0) /* hack to prevent definition in bib file *NI*/
+            newDefinition(name + 1, opt_param, def, param);
     }
 
     if (code == DEF_NEW || code == DEF_RENEW) {
@@ -235,12 +236,10 @@ void CmdNewDef(int code)
                    param, 
                    (opt_param) ? opt_param : "",
                    (def) ? def : "");
-    free(name);
-    free(def);
-    if (params)
-        free(params);
-    if (opt_param)
-        free(opt_param);
+    safe_free(name);
+    safe_free(def);
+    safe_free(params);
+    safe_free(opt_param);
 }
 
 void CmdNewEnvironment(int code)

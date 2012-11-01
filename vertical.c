@@ -588,6 +588,9 @@ parameter: code: newpage or newcolumn-option
             g_column_new = TRUE;
             break;
     }
+    /* skip all whitespaces */
+    safe_free(getBraceParam());
+    skipWhiteSpace();
 }
 
 /******************************************************************************

@@ -253,6 +253,7 @@ static CommandArray commands[] = {
     {"bibliography", CmdBibliography, 0},
     {"bibitem", CmdBibitem, 0},
     {"bibentry", CmdBibEntry, 0},
+    {"selectlanguageifdefined", CmdSelectlanguageifdefined, 0},
     {"newblock", CmdNewblock, 0},
     {"newsavebox", CmdIgnoreParameter, No_Opt_One_NormParam},
     {"usebox", CmdIgnoreParameter, No_Opt_One_NormParam},

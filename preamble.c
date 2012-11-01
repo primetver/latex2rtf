@@ -980,16 +980,15 @@ void CmdTitle(int code)
 void CmdTableOfContents(int code)
 {
     startParagraph("contents", PARAGRAPH_SECTION_TITLE);
-    fprintRTF(" ");
     ConvertBabelName("CONTENTSNAME");
     CmdEndParagraph(0);
-    CmdVspace(VSPACE_SMALL_SKIP);
+    CmdVspace(VSPACE_MEDIUM_SKIP);
     
     g_tableofcontents = TRUE;
     startParagraph("Normal", PARAGRAPH_GENERIC);
-    fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-%d\" }{\\fldrslt }}\n", getCounter("tocdepth")+1);  
+    fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-%d\" }{\\fldrslt }}\n", getCounter("tocdepth")+1);
     /* CmdNewPage(NewPage); */
-    CmdEndParagraph(0);
+    /*CmdEndParagraph(0);*/
 }
 
 /******************************************************************************
