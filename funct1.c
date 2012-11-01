@@ -582,7 +582,6 @@ void CmdSection(int code)
     
     orig_indent = getLength("parindent");
     orig_left_margin = getLeftMarginIndent();
-    hspace = orig_indent + amount;
 
     toc_entry = getBracketParam();
     heading = getBraceParam();
@@ -674,9 +673,13 @@ void CmdSection(int code)
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
             } else {
-                if (code == SECT_SUB && RussianMode) {
-                    setLength("parindent", -amount);
-                    setLeftMarginIndent(orig_left_margin + hspace);
+                if (RussianMode) {
+                    if (code == SECT_SUB) {
+                        setLength("parindent", -amount);
+                        setLeftMarginIndent(orig_left_margin + orig_indent + amount);
+                    } else {
+                        setLeftMarginIndent(orig_left_margin + orig_indent);
+                    }
                 }
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
                 if (code == SECT_SUB && getCounter("secnumdepth") >= 1) {
@@ -702,9 +705,13 @@ void CmdSection(int code)
                 ConvertString(heading);
                 fprintRTF(".} ");
             } else {
-                if (code == SECT_SUBSUB && RussianMode) {
-                    setLength("parindent", -amount);
-                    setLeftMarginIndent(orig_left_margin + hspace);
+                if (RussianMode) {
+                    if (code == SECT_SUBSUB) {
+                        setLength("parindent", -amount);
+                        setLeftMarginIndent(orig_left_margin + orig_indent + amount);
+                    } else {
+                        setLeftMarginIndent(orig_left_margin + orig_indent);
+                    }
                 }
                 startParagraph("subsubsection", PARAGRAPH_SECTION_TITLE);
                 
@@ -727,9 +734,8 @@ void CmdSection(int code)
         case SECT_SUBSUBSUB:
         case SECT_SUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
-            if (code == SECT_SUBSUBSUB && RussianMode) {
-                setLength("parindent", -amount);
-                setLeftMarginIndent(orig_left_margin + hspace);
+            if (RussianMode) {
+                setLeftMarginIndent(orig_left_margin + orig_indent);
             }
             startParagraph("paragraph", PARAGRAPH_SECTION_TITLE);
             if (code == SECT_SUBSUBSUB && getCounter("secnumdepth") >= 3) {
@@ -748,10 +754,9 @@ void CmdSection(int code)
         case SECT_SUBSUBSUBSUB:
         case SECT_SUBSUBSUBSUB_STAR:
             CmdVspace(VSPACE_MEDIUM_SKIP);
-            if (code == SECT_SUBSUBSUBSUB && RussianMode) {
-                setLength("parindent", -amount);
-                setLeftMarginIndent(orig_left_margin + hspace);
-        }
+            if (RussianMode) {
+                setLeftMarginIndent(orig_left_margin + orig_indent);
+            }
             startParagraph("subparagraph", PARAGRAPH_SECTION_TITLE);
             if (code == SECT_SUBSUBSUBSUB && getCounter("secnumdepth") >= 4) {
                 incrementCounter("subparagraph");
@@ -1068,7 +1073,7 @@ void CmdList(int code)
     if (g_processing_cell) {
         hspace = amount;
         vspace = getLength("topsep");
-    } else if (g_processing_list_environment == FALSE) {
+    } else if (!g_processing_list_environment) {
         hspace = getLength("parindent") + amount;
         vspace = getVspace() + getLength("topsep") + getLength("parskip");
     } else {
@@ -1076,8 +1081,6 @@ void CmdList(int code)
         vspace = getLength("topsep") + getLength("parskip");
     }
   
-    vspace = getLength("topsep") + getLength("parskip");
-   
     if (code != (INPARAENUM_MODE | ON) && code != (INPARAENUM_MODE | OFF) ) {
         if (getTexMode() == MODE_VERTICAL)
             vspace += getLength("partopsep");
