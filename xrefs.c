@@ -542,10 +542,8 @@ void CmdBibStyle(int code)
 void CmdBibliography(int code)
 {
     int err;
-    char *s;
 
-    s = getBraceParam();        /* throw away bibliography name */
-    safe_free(s);
+    ignoreBraceParam();        /* throw away bibliography name */
 
     err = PushSource(g_bbl_name, NULL);
     g_in_bibliography = TRUE;
@@ -576,7 +574,7 @@ void CmdThebibliography(int code)
         safe_free(s);
 
         CmdEndParagraph(0);
-        CmdVspace(VSPACE_BIG_SKIP);
+        setVspace(getLength("beforesectionskip"));
 
         if (g_document_type == FORMAT_APA) {
             ConvertString("\\begin{center}{\\bf");
@@ -604,14 +602,13 @@ void CmdThebibliography(int code)
             CmdEndParagraph(0);
         }
 
-        CmdVspace(VSPACE_BIG_SKIP);
+        setVspace(getLength("aftersectionskip"));
         PushEnvironment(BIBLIOGRAPHY_MODE);
         setLength("parindent", -amount);
         setLeftMarginIndent(getLeftMarginIndent() + amount);
     } else {
         diagnostics(4,"\\end{thebibliography}");
         CmdEndParagraph(0);
-        CmdVspace(VSPACE_SMALL_SKIP);
         PopEnvironment();
         g_processing_list_environment = FALSE;
     }
@@ -669,7 +666,7 @@ void CmdSelectlanguageifdefined(int code)
 {
     /* now only ignore the command and all white spaces after
      need to add code for set current language in RTF properly */
-    safe_free(getBraceParam());
+    CmdIgnoreParameter(No_Opt_One_NormParam);
     skipWhiteSpace();
 }
 

@@ -979,14 +979,17 @@ void CmdTitle(int code)
 
 void CmdTableOfContents(int code)
 {
+    setVspace(getLength("beforesectionskip"));
     startParagraph("contents", PARAGRAPH_SECTION_TITLE);
+    fprintRTF("\\sa%d ", getLength("aftersectionskip"));
     ConvertBabelName("CONTENTSNAME");
     CmdEndParagraph(0);
-    CmdVspace(VSPACE_BIG_SKIP);
     
     g_tableofcontents = TRUE;
-    startParagraph("Normal", PARAGRAPH_GENERIC);
     fprintRTF("{\\field{\\*\\fldinst TOC \\\\o \"1-%d\" }{\\fldrslt }}\n", getCounter("tocdepth")+1);
+
+    CmdIgnoreParameter(No_Opt_One_NormParam);
+    skipWhiteSpace();
 }
 
 /******************************************************************************
@@ -1003,32 +1006,30 @@ void CmdAnd(int code)
  ******************************************************************************/
 void CmdMakeTitle(int code)
 {
-    char title_begin[10];
-    char author_begin[10];
-    char date_begin[10];
-
     diagnostics(4,"CmdMakeTitle with  title ='%s'",g_preambleTitle);
     diagnostics(4,"CmdMakeTitle with author ='%s'",g_preambleAuthor);
     PushTrackLineNumber(FALSE);
-    snprintf(title_begin, 10, "%s%2d", "\\fs", (30 * CurrentFontSize()) / 20);
-    snprintf(author_begin, 10, "%s%2d", "\\fs", (24 * CurrentFontSize()) / 20);
-    snprintf(date_begin, 10, "%s%2d", "\\fs", (24 * CurrentFontSize()) / 20);
 
     setAlignment(CENTERED);
+
+    CmdEndParagraph(0);
     
     if (g_preambleTitle != NULL && strcmp(g_preambleTitle, "") != 0) {
         startParagraph("title", PARAGRAPH_FIRST);
         ConvertString(g_preambleTitle);
+        CmdEndParagraph(0);
     }
     
     if (g_preambleAuthor != NULL && strcmp(g_preambleAuthor, "") != 0) {
         startParagraph("author", PARAGRAPH_FIRST);
         ConvertString(g_preambleAuthor);
+        CmdEndParagraph(0);
     }
 
     if (g_preambleAffiliation != NULL && strcmp(g_preambleAffiliation, "") != 0) {
         startParagraph("author", PARAGRAPH_FIRST);
         ConvertString(g_preambleAffiliation);
+        CmdEndParagraph(0);
     }
 
     startParagraph("author", PARAGRAPH_FIRST);
@@ -1036,13 +1037,14 @@ void CmdMakeTitle(int code)
         fprintRTF("\\chdate ");
     else
         ConvertString(g_preambleDate);
+    CmdEndParagraph(0);
 
     if (g_preambleAck != NULL && strcmp(g_preambleAck, "") != 0) {
         startParagraph("author", PARAGRAPH_FIRST);
         ConvertString(g_preambleAck);
+        CmdEndParagraph(0);
     }
 
-    CmdEndParagraph(0);
     setAlignment(JUSTIFIED);
 
     if (g_preambleAbstract != NULL && strcmp(g_preambleAbstract, "") != 0) {
@@ -1052,16 +1054,19 @@ void CmdMakeTitle(int code)
         ConvertString(s);
         CmdAbstract(ABSTRACT_PRELUDE_END);
         free(s);
+        CmdEndParagraph(0);
     }
 
-    if (g_preambleTitlepage)
-        fprintRTF("\\page ");
-
-    if (g_document_type == FORMAT_APA)
+  
+    if (g_document_type == FORMAT_APA){
+        CmdNewPage(NewPage);
         startParagraph("Normal", PARAGRAPH_FIRST);
+        CmdEndParagraph(0);
+    }
+
+    CmdNewPage(NewPage);
 
     PopTrackLineNumber();
-    CmdNewPage(NewPage); 
 }
 
 void CmdPreambleBeginEnd(int code)

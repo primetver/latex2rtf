@@ -663,8 +663,9 @@ static void InitializeLatexLengths(void)
     /* Default Paragraph Sizes */
     setLength("baselineskip", 12 * 20);
     setLength("parindent", 15 * 20);
-    setLength("parskip", 0 * 20);
+    setLength("parskip", 0 * 20);       /* space between paragraphs outside of a list, and part of the space between a non-list paragraph and a list item */
 
+    /* Standard LaTeX Counters */
     setCounter("page", 0);
     setCounter("part", 0);
     setCounter("chapter", 0);
@@ -683,16 +684,21 @@ static void InitializeLatexLengths(void)
     setCounter("endfloatfigure", 0);
     setCounter("endfloattable", 0);
 
-    /* vertical separation lengths */
-    setLength("topsep", 3 * 20);
-    setLength("partopsep", 2 * 20);
-    setLength("parsep", 0 * 20);
-    setLength("itemsep", 3 * 20);
-    setLength("labelwidth", 0 * 20);
-    setLength("labelsep", 0 * 20);
-    setLength("itemindent", 0 * 20);
-    setLength("listparindent", 0 * 20);
-    setLength("leftmargin", 0 * 20);
+    /* List envoronments lengths */
+    setLength("topsep", 3 * 20);        /* extra space added to \parskip before the first and after the last item */
+    setLength("partopsep", 2 * 20);     /* extra space added to \topsep when environment starts a new paragraph */
+    setLength("parsep", 0 * 20);        /* haragraph separation within a single item (value assigned to \parskip by the latex list code) */
+    setLength("itemsep", 3 * 20);       /* extra inter-item spacing added to \parsep */
+    setLength("labelwidth", 0 * 20);    /* width allotted to the label. This should be set at least to or more than the longest expected label */
+    setLength("labelsep", 0 * 20);      /* the distance between the rightmost part of the label to the left margin of the item body */
+    setLength("itemindent", 0 * 20);    /* don't set this length except out of self-defense. It's trouble. */
+    setLength("listparindent", 0 * 20); /* The indent of the first line of each paragraph in an item, except for the first paragraph of an item.
+                                         * It can be a little ugly, but if you're pressed for vertical space and want to decrease interparagraph
+                                         * spacing within items while still giving the user cues as where new paragraphs begin, this is the way to do it. */
+    setLength("leftmargin", 0 * 20);    /* distance from the left edge of the current environment to the left margin of the item label (remember, environments can nest. Defaults to 0.) */
+    setLength("rightmargin", 0 * 20);   /* distance from the right edge of the current environment to the right margin of the item body. Defaults to 0. */
+
+    /* Other envoronments lengths */
     setLength("floatsep", 0 * 20);
     setLength("intextsep", 0 * 20);
     setLength("textfloatsep", 0 * 20);
@@ -702,12 +708,31 @@ static void InitializeLatexLengths(void)
     setLength("belowcaptionskip", 0 * 20);
     setLength("intextsep", 0 * 20);
 
+    /* Skip amount */
     setLength("smallskipamount", 3 * 20);
     setLength("medskipamount", 6 * 20);
     setLength("bigskipamount", 12 * 20);
 
     setLength("marginparsep", 10 * 20);
-    setLength("nomlabelwidth", 1400); /* app 2,5cm */
+    setLength("nomlabelwidth", 70 * 20); /* app 25 mm */
+
+    /* Sections before and after skip (non LaTeX) */
+    setLength("sectionlabelwidth", 35 * 20);
+    setLength("beforepartskip", 40 * 20);
+    setLength("afterpartskip", 40 * 20);
+    setLength("beforesectionskip", 40 * 20);
+    setLength("aftersectionskip", 40 * 20);
+    setLength("beforesubsectionskip", 28 * 20);
+    setLength("aftersubsectionskip", 28 * 20);
+    setLength("beforesubsubsectionskip", 18 * 20);
+    setLength("aftersubsubsectionskip", 18 * 20);
+    setLength("beforeparagraphskip", 12 * 20);
+    setLength("afterparagraphskip", 12 * 20);
+    setLength("beforesubparagraphskip", 6 * 20);
+    setLength("aftersubparagraphskip", 6 * 20);
+
+    /* Tables */
+    setLength("tabcolsep", 4 * 20);     /* distance between table columns */
 
     /* Set up deafults for RTF conversion */
     setCounter("RTFtrpaddb", 0);        /* table cell bottom magrin in twips */

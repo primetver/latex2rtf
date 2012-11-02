@@ -577,11 +577,9 @@ void CmdSection(int code)
     char *unit_label = NULL;
     char *unit_name = NULL;
     
-    int amount = 700; /* orig was 600 NI*/
-    int hspace, orig_indent, orig_left_margin;
-    
-    orig_indent = getLength("parindent");
-    orig_left_margin = getLeftMarginIndent();
+    int amount = getLength("sectionlabelwidth");
+    int orig_indent = getLength("parindent");
+    int orig_left_margin = getLeftMarginIndent();
 
     toc_entry = getBracketParam();
     heading = getBraceParam();
@@ -633,18 +631,18 @@ void CmdSection(int code)
                 InsertBookmark(g_section_label, unit_label);
             }
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_BIG_SKIP);
+            setVspace(getLength("beforepartskip"));
             startParagraph("chapter", PARAGRAPH_SECTION_TITLE);
             ConvertString(heading);
             CmdEndParagraph(0);
-/*            InsertContentMark('c', unit_name, " ", unit_label, " ", heading);*/
-            CmdVspace(VSPACE_BIG_SKIP);
+            /*InsertContentMark('c', unit_name, " ", unit_label, " ", heading);*/
+            setVspace(getLength("afterpartskip"));
             break;
 
         case SECT_NORM:
         case SECT_NORM_STAR:
-            CmdVspace(VSPACE_BIG_SKIP);
-	    if (g_document_type == FORMAT_APA) {
+            setVspace(getLength("beforesectionskip"));
+            if (g_document_type == FORMAT_APA) {
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
             } else {                 
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
@@ -664,12 +662,12 @@ void CmdSection(int code)
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_BIG_SKIP);
+            setVspace(getLength("aftersectionskip"));
             break;
 
         case SECT_SUB:
         case SECT_SUB_STAR:
-            CmdVspace(VSPACE_BIG_SKIP);
+            setVspace(getLength("beforesubsectionskip"));
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
             } else {
@@ -693,12 +691,12 @@ void CmdSection(int code)
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_MEDIUM_SKIP);
+            setVspace(getLength("aftersubsectionskip"));
             break;
 
         case SECT_SUBSUB:
         case SECT_SUBSUB_STAR:
-            CmdVspace(VSPACE_BIG_SKIP);
+            setVspace(getLength("beforesubsubsectionskip"));
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsubsection", PARAGRAPH_GENERIC);
                 fprintRTF("{\\i ");
@@ -727,13 +725,13 @@ void CmdSection(int code)
                 }
                 ConvertString(heading);
                 CmdEndParagraph(0);
-                CmdVspace(VSPACE_MEDIUM_SKIP);
+                setVspace(getLength("aftersubsubsectionskip"));
             }
             break;
 
         case SECT_SUBSUBSUB:
         case SECT_SUBSUBSUB_STAR:
-            CmdVspace(VSPACE_MEDIUM_SKIP);
+            setVspace(getLength("beforeparagraphskip"));
             if (RussianMode) {
                 setLeftMarginIndent(orig_left_margin + orig_indent);
             }
@@ -748,12 +746,12 @@ void CmdSection(int code)
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_MEDIUM_SKIP);
+            setVspace(getLength("afterparagraphskip"));
             break;
 
         case SECT_SUBSUBSUBSUB:
         case SECT_SUBSUBSUBSUB_STAR:
-            CmdVspace(VSPACE_MEDIUM_SKIP);
+            setVspace(getLength("beforesubparagraphskip"));
             if (RussianMode) {
                 setLeftMarginIndent(orig_left_margin + orig_indent);
             }
@@ -767,7 +765,7 @@ void CmdSection(int code)
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            CmdVspace(VSPACE_SMALL_SKIP);
+            setVspace(getLength("aftersubparagraphskip"));
             break;
     }
     
@@ -1719,11 +1717,8 @@ void CmdQuad(int kk)
  ******************************************************************************/
 {
     int z;
- 
-    fprintRTF("{");
-    for (z = 0; z <= kk; z++)
-        fprintRTF("\\~");
-    fprintRTF("}");
+    for (z = 0; z < kk; z++)
+        fprintRTF("\\emspace ");
 }
 
 void CmdSpace(float kk)
@@ -2641,7 +2636,7 @@ void CmdThenomenclature(int code)
     if (code & ON) {
         diagnostics(4,"\\begin{thenomenclature}");
         CmdEndParagraph(0);
-        CmdVspace(VSPACE_BIG_SKIP);
+        setVspace(getLength("beforesectionskip"));
         startParagraph("section", PARAGRAPH_SECTION_TITLE);
 
         int i = existsDefinition("nomname");    /* see if nomname has * been redefined */
@@ -2653,7 +2648,7 @@ void CmdThenomenclature(int code)
             ConvertBabelName("NOMNAME");
         }
         CmdEndParagraph(0);
-        CmdVspace(VSPACE_BIG_SKIP);
+        setVspace(getLength("aftersectionskip"));
         PushEnvironment(ITEMIZE_MODE);          /* actually use list in itemize mode */
         int amount = getLength("nomlabelwidth");
         setLength("parindent", -amount);
@@ -2730,7 +2725,7 @@ void CmdESKDappendix(int code)
     ConvertString(heading);
     fprintRTF("}");
     CmdEndParagraph(0);
-    CmdVspace(VSPACE_BIG_SKIP);
+    setVspace(getLength("aftersectionskip"));
     
     safe_free(unit_label);
     safe_free(heading);

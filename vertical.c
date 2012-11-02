@@ -67,6 +67,7 @@ static int g_TeX_mode = MODE_VERTICAL;
 static int g_line_spacing = 240;
 static int g_paragraph_no_indent = FALSE;
 static int g_paragraph_inhibit_indent = FALSE;
+static int g_next_paragraph_after_section = TRUE;
 static int g_vertical_space_to_add = 0;
 static int g_right_margin_indent;
 static int g_left_margin_indent;
@@ -129,6 +130,11 @@ void setVspace(int space)
 int getVspace(void)
 {
     return g_vertical_space_to_add;
+}
+
+int  nextParagraphAfterSection(void)
+{
+    return g_next_paragraph_after_section;
 }
 
 /******************************************************************************
@@ -253,12 +259,10 @@ void changeTexMode(int mode)
 void startParagraph(const char *style, int indenting)
 {
     int width, a, b, c;
-    int parindent,parskip;
+    int parindent, parskip, vspace;
     static char last_style[50] = "Normal";
     static char the_style[50] = "Normal";
     static int last_indent = 0;
-    static int next_paragraph_after_section = TRUE;
-    static int next_no_vskip = TRUE;
     
     int orig_font_family = CurrentFontFamily();
     int orig_font_size = CurrentFontSize();
@@ -280,6 +284,7 @@ void startParagraph(const char *style, int indenting)
         
     parindent = getLength("parindent");
     parskip   = getLength("parskip");
+    vspace    = getVspace();
 
     if (g_par_brace !=0 )
         diagnostics(5,"******************* starting %s paragraph with braces = %d", style, g_par_brace);        
@@ -322,7 +327,7 @@ void startParagraph(const char *style, int indenting)
 
         default:                              /* Worry about not indenting */
             diagnostics(5, "PARAGRAPH_GENERIC");
-            if (next_paragraph_after_section || g_paragraph_no_indent || 
+            if ((g_next_paragraph_after_section && !FrenchMode && !RussianMode) || g_paragraph_no_indent ||
                 g_paragraph_inhibit_indent   || g_processing_list_environment)
                 parindent = 0;
             break;
@@ -352,17 +357,19 @@ void startParagraph(const char *style, int indenting)
     diagnostics(6, "current font shape  %d", CurrentFontShape());
 
     if (g_page_new) {
-        fprintRTF("\\page\n");   /* causes new page */
+        fprintRTF("\\page\n");          /* causes new page */
         g_page_new = FALSE;
         g_column_new = FALSE;
+        vspace = 0;
     }
 
     if (g_column_new) {
         if (twocolumn)
-	  fprintRTF("\\column\n"); /* causes new column */
-	else
-	  fprintRTF("\\page\n");   /* added: causes new page */
+            fprintRTF("\\column\n");    /* causes new column */
+        else
+            fprintRTF("\\page\n");      /* added: causes new page */
         g_column_new = FALSE;
+        vspace = 0;
     }
 
     if (!g_processing_cell) {
@@ -394,14 +401,13 @@ void startParagraph(const char *style, int indenting)
         fprintRTF("\\pard\\intbl");  
     }
 
-    if (next_no_vskip == TRUE && indenting == PARAGRAPH_SECTION_TITLE)
-	/* redefine style - use zero extra space before section titles after previous section titles */
-	fprintRTF("\\sb0 "); 
-    else {
-	if (getVspace() > 0)
-	    /* redefine style - use Vspase value */
-	    fprintRTF("\\sb%d ", getVspace());
+    if (getVspace() > 0) {
+        fprintRTF("\\sb%d ", vspace);
+        
+        if (indenting == PARAGRAPH_SECTION_TITLE)
+            fprintRTF("\\sa0 ");        /* actually ignore style, correct spacing set by code */
     }
+
     setVspace(parskip);
 
     if (g_left_margin_indent != 0)
@@ -441,16 +447,10 @@ void startParagraph(const char *style, int indenting)
             g_paragraph_inhibit_indent = FALSE;
     }
      
-    if (indenting == PARAGRAPH_SECTION_TITLE && !FrenchMode && !RussianMode)
-    	next_paragraph_after_section = TRUE;
-    else 
-    	next_paragraph_after_section = FALSE;
-    
     if (indenting == PARAGRAPH_SECTION_TITLE)
-    	next_no_vskip = TRUE;
-    else 
-    	next_no_vskip = FALSE;
-
+        g_next_paragraph_after_section = TRUE;
+    else
+        g_next_paragraph_after_section = FALSE;
 }
 
 void CmdEndParagraph(int code)
@@ -589,7 +589,7 @@ parameter: code: newpage or newcolumn-option
             break;
     }
     /* skip all whitespaces */
-    safe_free(getBraceParam());
+    CmdIgnoreParameter(No_Opt_One_NormParam);
     skipWhiteSpace();
 }
 

@@ -56,3 +56,5 @@ void changeTexMode(int mode);
 
 void setVspace(int space);
 int  getVspace(void);
+
+int  nextParagraphAfterSection(void);

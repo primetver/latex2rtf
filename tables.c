@@ -956,7 +956,6 @@ void CmdTabular(int code)
         diagnostics(4, "Exiting CmdTabular");
         g_processing_tabular = FALSE;
         CmdIndent(INDENT_USUAL);
-        /*CmdEndParagraph(0);*/
         return;
     }
     
@@ -1620,7 +1619,7 @@ void CmdHline(int code)
     /* cline and hline are already handled by tabular code 
     here we just properly skip the commands             */
     if (code == 1) {
-        safe_free(getBraceParam());
+        CmdIgnoreParameter(No_Opt_One_NormParam);
         skipWhiteSpace();
     }
 }
