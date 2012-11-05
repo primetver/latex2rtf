@@ -382,6 +382,13 @@ int main(int argc, char **argv)
         diagnostics(2, "home directory is <%s>", (g_home_dir) ? g_home_dir : "");
     }
 
+    if (g_config_path)
+    {
+       char *path = strdup_together(g_config_path, "/graphics");
+       appendGraphicsPath(path);
+       free(path);
+    }
+    
     ReadCfg();
 
     if (PushSource(g_tex_name, NULL) == 0) {

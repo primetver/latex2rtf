@@ -175,7 +175,7 @@ static GraphConvertElement GraphConvertTable[] = {
 static char **graphicsPath = NULL;
 static int nGraphicsPathElems = 0;
 
-static void appendGraphicsPath (char *newPath)
+void appendGraphicsPath (char *newPath)
 {
     int i;
     void *ptr;
@@ -198,7 +198,7 @@ static void appendGraphicsPath (char *newPath)
     else
     	add = strdup_together(newPath,"/");
     graphicsPath[nGraphicsPathElems++] = add;
-    diagnostics (WARNING, "Included %s in graphics search path", add);
+    diagnostics (4, "Included %s in graphics search path", add);
 }
 
 void CmdGraphicsPath(int code)

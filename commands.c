@@ -417,7 +417,7 @@ static CommandArray PreambleCommands[] = {
     {"def", CmdNewDef, DEF_DEF},
     {"gdef", CmdNewDef, DEF_DEF},
     {"newcommand", CmdNewDef, DEF_NEW},
-    {"providecommand", CmdNewDef, DEF_NEW},
+    {"providecommand", CmdNewDef, DEF_RENEW},
     {"DeclareRobustCommand", CmdNewDef, DEF_NEW},
     {"DeclareRobustCommand*", CmdNewDef, DEF_NEW},
     {"renewcommand", CmdNewDef, DEF_RENEW},

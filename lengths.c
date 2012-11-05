@@ -32,7 +32,7 @@ By convention all the values stored should be twips  20 twips = 1 pt
 #include "lengths.h"
 #include "parser.h"
 
-#define MAX_LENGTHS 50
+#define MAX_LENGTHS 500
 
 typedef struct {
     char *name;

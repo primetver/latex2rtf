@@ -474,7 +474,6 @@ void CmdEndParagraph(int code)
             diagnostics(5,"*********************** ending paragraph with braces = %d", g_par_brace);
         g_paragraph_inhibit_indent = FALSE;
     }
-
 }
 
 void CmdHfill(int code)

@@ -622,7 +622,7 @@ void skipSpaces(void)
     ungetTexChar(c);
 }
 
-void    skipWhiteSpace(void)
+void skipWhiteSpace(void)
 /***************************************************************************
  Description: skip over spaces and linefeeds
 ****************************************************************************/
@@ -764,7 +764,7 @@ void CmdIgnoreParameter(int code)
                 break;
 
             default:
-                diagnostics(WARNING, "Ignored command missing {} expected %d - found %d", code % 10,
+                diagnostics(4, "Ignored command missing {} expected %d - found %d", code % 10,
                   code % 10 - regParmCount);
                 ungetTexChar(cThis);
                 return;

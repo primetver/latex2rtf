@@ -370,8 +370,8 @@ void CmdFontSeries(int code)
         true_code == F_SERIES_BOLD_4) && !(code & ON))
         return;
 
-    if (getTexMode() == MODE_VERTICAL)
-        changeTexMode(MODE_HORIZONTAL);
+//    if (getTexMode() == MODE_VERTICAL)
+//        changeTexMode(MODE_HORIZONTAL);
 
     switch (code) {
         case F_SERIES_MEDIUM_3:
@@ -487,8 +487,8 @@ void CmdEmphasize(int code)
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
       RtfFontInfo[FontInfoDepth].size, RtfFontInfo[FontInfoDepth].shape, RtfFontInfo[FontInfoDepth].series);
 
-    if (getTexMode() == MODE_VERTICAL)
-        changeTexMode(MODE_HORIZONTAL);
+//    if (getTexMode() == MODE_VERTICAL)
+//        changeTexMode(MODE_HORIZONTAL);
 
     if (true_code == F_EMPHASIZE_3 && !(code & ON))
         return;

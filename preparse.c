@@ -164,8 +164,8 @@ void preParse(char **body, char **header, char **label)
     int any_possible_match, found;
     char cNext, cThis, *s, *text, *next_header, *str, *p;
     int i;
-    int possible_match[52];
-    char *command[52] = { "",   /* 0 entry is for user definitions */
+    int possible_match[53];
+    char *command[53] = { "",   /* 0 entry is for user definitions */
         "",                     /* 1 entry is for user environments */
         "\\begin{verbatim}", 
         "\\begin{figure}",      "\\begin{figure*}", 
@@ -186,10 +186,10 @@ void preParse(char **body, char **header, char **label)
         "\\part", "\\chapter",  "\\section", "\\subsection", "\\subsubsection",
         "\\section*", "\\subsection*", "\\subsubsection*", "\\ESKDappendix",
         "\\label", "\\input", "\\include", "\\verb", "\\url", "\\nolinkurl",
-        "\\newcommand", "\\def", "\\renewcommand", "\\endinput", "\\end{document}",
+        "\\newcommand", "\\def", "\\renewcommand", "\\providecommand", "\\endinput", "\\end{document}",
     };
 
-    int ncommands = 52;
+    int ncommands = 53;
 
     const int b_verbatim_item = 2;
     const int b_figure_item = 3;
@@ -234,8 +234,9 @@ void preParse(char **body, char **header, char **label)
     const int new_item = 47;
     const int def_item = 48;
     const int renew_item = 49;
-    const int endinput_item = 50;
-    const int e_document_item = 51;
+    const int provide_item = 50;
+    const int endinput_item = 51;
+    const int e_document_item = 52;
 
     int bs_count = 0;          /* number of backslashes encountered in a row */
     size_t cmd_pos = 0;        /* position of start of command relative to end of buffer */
@@ -541,7 +542,8 @@ void preParse(char **body, char **header, char **label)
         }
 
         /* process any new definitions */
-        if (i_match == def_item || i_match == new_item || i_match == renew_item) {
+        if (i_match == def_item || i_match == new_item ||
+            i_match == renew_item || i_match == provide_item) {
         
             cNext = getRawTexChar();    /* wrong when cNext == '%' */
             ungetTexChar(cNext);
