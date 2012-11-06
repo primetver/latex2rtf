@@ -1855,11 +1855,11 @@ static char *exists_with_any_extension(const char *dir, const char *name, const 
     char *x, *newpath;
     int  i;
 
-    /* if no graphics path or a name is fully specified then try the plain file only */
-    if (nGraphicsPathElems == 0)
-        return exists_with_extension(dir,name,ext);
+    /* first - try the plain file only */
+    x = exists_with_extension(dir,name,ext);
+    if (x) return x;
     
-    /* else try the different directories in the graphics path */
+    /* second - try the different directories in the graphics path */
     for (i=0; i<nGraphicsPathElems; i++) {
         newpath = strdup_together(dir,graphicsPath[i]);
         diagnostics(4,"does '%s%s%s' exist?",newpath,name,ext);
