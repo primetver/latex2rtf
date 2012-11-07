@@ -696,9 +696,9 @@ static void InitializeLatexLengths(void)
     setLength("partopsep", 2 * 20);     /* extra space added to \topsep when environment starts a new paragraph */
     setLength("parsep", 0 * 20);        /* haragraph separation within a single item (value assigned to \parskip by the latex list code) */
     setLength("itemsep", 3 * 20);       /* extra inter-item spacing added to \parsep */
-    setLength("labelwidth", 0 * 20);    /* width allotted to the label. This should be set at least to or more than the longest expected label */
+    setLength("labelwidth", 15 * 20);   /* width allotted to the label. This should be set at least to or more than the longest expected label */
     setLength("labelsep", 0 * 20);      /* the distance between the rightmost part of the label to the left margin of the item body */
-    setLength("itemindent", 0 * 20);    /* don't set this length except out of self-defense. It's trouble. */
+    setLength("itemindent", 0 * 20);    /* don't set this length except out of self-defense. */
     setLength("listparindent", 0 * 20); /* The indent of the first line of each paragraph in an item, except for the first paragraph of an item.
                                          * It can be a little ugly, but if you're pressed for vertical space and want to decrease interparagraph
                                          * spacing within items while still giving the user cues as where new paragraphs begin, this is the way to do it. */
@@ -748,7 +748,6 @@ static void InitializeLatexLengths(void)
     setCounter("RTFtrpaddr", 130);      /* table cell right magrin in twips */
     setCounter("RTFheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */
     setCounter("RTFtrkeep", 1);         /* non breake row flag */
-    setCounter("RTFamount", 300);       /* list item amount */
 }
 
 static void ConvertLatexPreamble(void)

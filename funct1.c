@@ -1066,7 +1066,7 @@ void CmdList(int code)
  ******************************************************************************/
 {
     int vspace, hspace;
-    int amount = getCounter("RTFamount");
+    int amount = getLength("labelwidth") + getLength("labelsep");
 
     if (g_processing_cell) {
         hspace = amount;
@@ -1108,7 +1108,7 @@ void CmdList(int code)
         case (DESCRIPTION_MODE | ON):
             setVspace(vspace);
             PushEnvironment(DESCRIPTION_MODE);
-            setLength("parindent", -amount);
+            setLength("parindent", -hspace);
             setLeftMarginIndent(getLeftMarginIndent() + hspace);
             CmdIndent(INDENT_USUAL);
             break;
