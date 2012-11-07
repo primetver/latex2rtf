@@ -955,6 +955,7 @@ void CmdTabular(int code)
     if (!(code & ON)) {
         diagnostics(4, "Exiting CmdTabular");
         g_processing_tabular = FALSE;
+        CmdEndParagraph(0);
         CmdIndent(INDENT_USUAL);
         return;
     }
@@ -987,6 +988,9 @@ void CmdTabular(int code)
             diagnostics(ERROR, "This can't happen --- bad code to CmdTabular");
             exit(1);
     }
+    
+    /* end current paragraph and go to vertical */
+    CmdEndParagraph(0);
 
     pos = getBracketParam();
     cols = getBraceParam();
@@ -1116,6 +1120,9 @@ void CmdTabular(int code)
                 CmdIndent(INDENT_NONE);
                 startParagraph("Normal", PARAGRAPH_FIRST);
             }*/
+
+            CmdIndent(INDENT_NONE);
+            startParagraph("Normal", PARAGRAPH_FIRST);
             
             /* PrintTabular(tabular_layout); */
             diagnostics(5, "*********** TABULAR TABULAR TABULAR *************");
@@ -1457,7 +1464,8 @@ void CmdTabbing(int code)
 
     if (!(code & ON)) {
         diagnostics(4, "Exiting CmdTabbing");
-        /*CmdEndParagraph(0);*/
+        CmdEndParagraph(0);
+        CmdIndent(INDENT_USUAL);
         g_processing_tabbing = FALSE;
         return;
     }
@@ -1470,6 +1478,9 @@ void CmdTabbing(int code)
     end = strdup("\\end{tabbing}");
     table = getTexUntil(end, FALSE);
     diagnostics(4, "Entering CmdTabbing()");
+
+    /* end current paragraph and go to the vertial mode */
+    CmdEndParagraph(0);
 
     if (g_tabular_display_bitmap) {     
         PrepareDisplayedBitmap("tabbing");
@@ -1487,6 +1498,8 @@ void CmdTabbing(int code)
             CmdIndent(INDENT_NONE);
             startParagraph("Normal", PARAGRAPH_FIRST);
         }*/
+
+        startParagraph("Normal", PARAGRAPH_FIRST);
     
         n_total = 0;
         while (this_row && strlen(this_row) > 0) {
@@ -1508,7 +1521,6 @@ void CmdTabbing(int code)
         }
     }
     ConvertString(end);
-    
 
     free(table);
     free(end);
@@ -1534,7 +1546,9 @@ void CmdTable(int code)
         location = getBracketParam();
         if (location) free(location);
 
+        /* end current paragraph if was no ended before */
         CmdEndParagraph(0);
+        
         oldalignment = getAlignment();
         setAlignment(JUSTIFIED);
 
@@ -1563,8 +1577,7 @@ void CmdTable(int code)
                 fprintRTF("%d about here]", getCounter("endfloattable"));
             }
         } else {
-            /* startParagraph("table", PARAGRAPH_GENERIC);  removed *NI*/
-	    ConvertString(table_contents);
+            ConvertString(table_contents);
         }
         free(table_contents);
         
@@ -1575,6 +1588,7 @@ void CmdTable(int code)
     } else {
         g_processing_table = FALSE;
 	CmdEndParagraph(0);
+        CmdIndent(INDENT_USUAL);
         safe_free(g_table_label);
         setAlignment(oldalignment);
         CmdVspace(VSPACE_MEDIUM_SKIP);
