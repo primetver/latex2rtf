@@ -1127,7 +1127,7 @@ Needs to be terminated for:
 - myheadings page nunmbering, combined with markboth, markright.
  ******************************************************************************/
 {
-    static char *style = "";
+    char *style;
 
     style = getBraceParam();
     if (strcmp(style, "empty") == 0) {
@@ -1149,6 +1149,8 @@ Needs to be terminated for:
     } else {
         diagnostics(WARNING, "\\pagestyle{%s} unknown", style);
     }
+
+    safe_free(style);
 }
 
 void CmdHeader(int code)
@@ -1647,7 +1649,7 @@ purpose: writes header info for the RTF file
     diagnostics(4, "Writing header for RTF file");
 
 /*  fprintRTF("{\\rtf1\\ansi\\fs%d\\deff%d\\deflang1024\n", size, family); */
-    fprintRTF("{\\rtf1\\ansi\\uc1\\deff%d\\deflang1024\n", family);
+    fprintRTF("{\\rtf1\\ansi\\uc1\\deff%d\\deflang1024\\titlepg\n", family);
     WriteFontHeader();
     WriteColorTable();
     WriteStyleHeader();
