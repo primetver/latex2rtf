@@ -658,7 +658,7 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
         TabularMultiParameters(cell, &span, &align, &multi_left_border, &multi_right_border);
                 
         if (headrow)
-            fprintRTF("\\clvertalc");  /* centered vertial alignment for head row */
+            fprintRTF("\\clvertalc\\clshdng1000");  /* centered vertial alignment for head row */
 
         if (span > 1)
             fprintRTF("\\clmgf");

@@ -2134,8 +2134,11 @@ void CmdGraphics(int code)
 			diagnostics(2,"located graphics file as '%s'",fullpathname);
 			thisFormat->encoder(fullpathname, height, width, scale, baseline);
 	   } else 
-			diagnostics(WARNING, "The graphics file '%s' was not found", filename); 
-		
+			diagnostics(WARNING, "The graphics file '%s' was not found", filename);
+
+       if (g_processing_figure)
+           fprintRTF("\\keepn ");       /* in floating environment (not in para) -- keep it with next paragraph */
+	
        safe_free(dir);
        safe_free(name);
        safe_free(ext);

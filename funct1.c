@@ -815,6 +815,7 @@ void CmdCaption(int code)
 
     /* Different styles for figure and table captions *NI*/
     if (g_processing_figure) {
+        /* caption below */
         startParagraph("caption figure", PARAGRAPH_FIRST);
 	fprintRTF("{");
         incrementCounter("figure");
@@ -823,8 +824,9 @@ void CmdCaption(int code)
         n = getCounter("figure");
         c = 'f';
     } else {
+        /* caption above */
 	startParagraph("caption table", PARAGRAPH_FIRST);
-	fprintRTF("{");
+	fprintRTF("\\keepn {");
         incrementCounter("table");
         ConvertBabelName("TABLENAME");
         fprintRTF(" ");
@@ -1082,8 +1084,11 @@ void CmdList(int code)
     if (code != (INPARAENUM_MODE | ON) && code != (INPARAENUM_MODE | OFF) ) {
         if (getTexMode() == MODE_VERTICAL)
             vspace += getLength("partopsep");
-        else
+        else {
+            if (code & ON)
+                fprintRTF("\\keepn ");      /* keep current paragraph with following first list item */
             CmdEndParagraph(0);
+        }
     }
     
     switch (code) {
