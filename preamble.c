@@ -1432,21 +1432,27 @@ void CmdHeadFoot(int code)
     diagnostics(4, "CmdHeadFoot code=%d <%s>", code, HeaderText);
     switch (code) {
         case CFOOT:
+            safe_free(g_preambleCFOOT);
             g_preambleCFOOT = HeaderText;
             break;
         case LFOOT:
+            safe_free(g_preambleLFOOT);
             g_preambleLFOOT = HeaderText;
             break;
         case RFOOT:
+            safe_free(g_preambleRFOOT);
             g_preambleRFOOT = HeaderText;
             break;
         case CHEAD:
+            safe_free(g_preambleCHEAD);
             g_preambleCHEAD = HeaderText;
             break;
         case LHEAD:
+            safe_free(g_preambleLHEAD);
             g_preambleLHEAD = HeaderText;
             break;
         case RHEAD:
+            safe_free(g_preambleRHEAD);
             g_preambleRHEAD = HeaderText;
             break;
     }
@@ -1454,6 +1460,24 @@ void CmdHeadFoot(int code)
     if (!g_processing_preamble)
         WriteHeadFoot();
 }
+
+
+void CmdTitleHeadFoot(int code)
+
+/******************************************************************************
+ purpose: performs \titlehead \titlefoot commands for titlepage
+    code: 0 - header; 1 - footer
+ ******************************************************************************/
+{
+    if (code != 0)
+        fprintRTF("{\\footerf ");
+    else
+        fprintRTF("{\\headerf ");
+    
+    ConvertString(getBraceParam());
+    fprintRTF("}\n");
+}
+
 
 static void WriteColorTable(void)
 

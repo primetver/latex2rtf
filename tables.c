@@ -794,7 +794,7 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
 	    BeginCellRTF(align);
         if (cell != NULL) {
             if (row_num <= headrows && ESKDMode)
-                fprintRTF("\\b ");              /* force bold for head rows in ESKDMode */
+                fprintRTF("\\b\\keepn");              /* force bold & keepn for head rows in ESKDMode */
             fprintRTF("{");
             ConvertString(cell);
             fprintRTF("}");
