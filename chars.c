@@ -316,9 +316,9 @@ void CmdAcuteChar(int code)
             fprintRTF("\\'b4");
             break;
         default:
+            ConvertString(cParam);
             fprintRTF("{\\f%d",n);
             fprintRTF("\\u769\\'b4}");   /* unicode combining character 0x0301 */
-            ConvertString(cParam);
             break;  
     }
             
@@ -420,9 +420,9 @@ void CmdMacronChar(int code)
             fprintRTF("\\'5f");
             break;
         default:
+            ConvertString(cParam);
             fprintRTF("{\\f%d",n);
             fprintRTF("\\u772\\'5f}");  /* unicode combining character 0x0304 */
-            ConvertString(cParam);
             break;  
     }
 

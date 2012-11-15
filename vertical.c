@@ -540,6 +540,8 @@ void CmdVspace(int code)
 
     if (getTexMode() == MODE_VERTICAL)
         setVspace(getVspace()+vspace);
+
+    CmdIgnoreParameter(No_Opt_One_NormParam); /* keep in MODE_VERTICAL */
 }
 
 void CmdIndent(int code)

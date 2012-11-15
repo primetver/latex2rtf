@@ -239,11 +239,13 @@ void CmdFontFamily(int code)
         case F_FAMILY_SANSSERIF_2:
         case F_FAMILY_TYPEWRITER_2:
         case F_FAMILY_CALLIGRAPHIC_2:
-            fprintRTF("{\\f%d ", num);
+            if (getTexMode() == MODE_VERTICAL)
+                changeTexMode(MODE_HORIZONTAL);
             s = getBraceParam();
+            fprintRTF("{\\f%d ", num);
             ConvertString(s);
-            free(s);
             fprintRTF("}");
+            free(s);
             break;
     }
 
