@@ -47,6 +47,7 @@ Authors:
 #include "vertical.h"
 #include "auxfile.h"
 #include "acronyms.h"
+#include "definitions.h"
 
 extern char *Version;  /*storage and definition in version.h */
 
@@ -982,7 +983,16 @@ void CmdTableOfContents(int code)
     setVspace(getLength("beforesectionskip"));
     startParagraph("contents", PARAGRAPH_SECTION_TITLE);
     fprintRTF("\\sa%d ", getLength("aftersectionskip"));
-    ConvertBabelName("CONTENTSNAME");
+
+    int i = existsDefinition("contentsname");    /* see if contentsname was redefined */
+    if (i > -1) {
+        char *str = expandDefinition(i);
+        ConvertString(str);
+        safe_free(str);
+    } else {
+        ConvertBabelName("CONTENTSNAME");
+    }
+    
     CmdEndParagraph(0);
     
     g_tableofcontents = TRUE;
@@ -999,7 +1009,6 @@ void CmdAnd(int code)
 {
     startParagraph("author", PARAGRAPH_GENERIC);
 }
-
 
 /******************************************************************************
   purpose: Creates a title page based on saved values for author, title, and date

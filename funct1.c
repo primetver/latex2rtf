@@ -30,6 +30,7 @@ Authors:
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include "main.h"
 #include "convert.h"
 #include "funct1.h"
@@ -2182,11 +2183,35 @@ void CmdTextFont(int code)
 }
 
 /******************************************************************************
- purpose: ignores \the
+ purpose: Print some internal registers
+    code: 0 = \the 1 = \number
  ******************************************************************************/
 void CmdThe(int code)
 {
+    char *reg = getBraceParam();
+    if (reg == NULL)
+        return;
 
+    if (getTexMode() == MODE_VERTICAL)
+        changeTexMode(MODE_HORIZONTAL);
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+    
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+    
+    if (strcmp(reg, "\\year") == 0) {
+        fprintRTF("{%d}", 1900 + timeinfo->tm_year);
+    } else if (strcmp(reg, "\\day") == 0) {
+        fprintRTF("{%d}", timeinfo->tm_mday);
+    } else if (strcmp(reg, "\\month") == 0) {
+        fprintRTF("{%d}", timeinfo->tm_mon);
+    } else if (code == 0) { /* only for \the command */
+        ConvertString(reg);
+    }
+
+    free(reg);
 }
 
 /******************************************************************************
@@ -2644,7 +2669,7 @@ void CmdThenomenclature(int code)
         setVspace(getLength("beforesectionskip"));
         startParagraph("section", PARAGRAPH_SECTION_TITLE);
 
-        int i = existsDefinition("nomname");    /* see if nomname has * been redefined */
+        int i = existsDefinition("nomname");    /* see if nomname was redefined */
         if (i > -1) {
             char *str = expandDefinition(i);
             ConvertString(str);

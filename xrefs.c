@@ -579,8 +579,7 @@ void CmdThebibliography(int code)
         if (g_document_type == FORMAT_APA) {
             ConvertString("\\begin{center}{\\bf");
         } else {
-            startParagraph("bibliography", PARAGRAPH_SECTION_TITLE);
-            fprintRTF("{\\plain\\b\\fs32 ");
+            startParagraph("section", PARAGRAPH_SECTION_TITLE);
         }
         i = existsDefinition("refname");    /* see if refname has * been redefined */
         if (i > -1) {
@@ -598,7 +597,6 @@ void CmdThebibliography(int code)
         if (g_document_type == FORMAT_APA) {
             ConvertString("}\\end{center}");
         } else {
-            fprintRTF("}");
             CmdEndParagraph(0);
         }
 

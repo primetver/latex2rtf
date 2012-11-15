@@ -135,6 +135,7 @@ static CommandArray commands[] = {
     {"mathnormal", CmdTextNormal, F_TEXT_NORMAL_3},
     {"textfont", CmdTextFont, 0},
     {"the", CmdThe, 0},
+    {"number", CmdThe, 1},
 
     {"raggedleft", CmdAlign, PAR_RAGGEDLEFT}, /* new *NI*/
     {"raggedright", CmdAlign, PAR_RAGGEDRIGHT},
