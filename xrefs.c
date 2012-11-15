@@ -643,9 +643,9 @@ void CmdBibitem(int code)
         if (g_document_bibstyle == BIBSTYLE_STANDARD ||
            (g_document_bibstyle == BIBSTYLE_NATBIB && g_bibpunct_style != BIB_STYLE_ALPHA)) {
             fprintRTF("%s", g_bibstyle_punct[0]);
-            fprintRTF("{\\v\\*\\bkmkstart BIB_%s}", signet);
+            fprintRTF("{\\v\\*\\bkmkstart _BIB_%s}", signet);
             ConvertString(s);
-            fprintRTF("{\\*\\bkmkend BIB_%s}", signet);
+            fprintRTF("{\\*\\bkmkend _BIB_%s}", signet);
             fprintRTF("%s", g_bibstyle_punct[1]);
             fprintRTF("\\tab\n");
         }
@@ -781,7 +781,7 @@ void InsertBookmarkHidden(char *name, char *text, int hidden)
         diagnostics(4, "bookmark %s being inserted around <%s>", signet, text);
         RecordBookmark(signet);
         if (fields_use_REF()) {
-            fprintRTF("{\\*\\bkmkstart BM_%s}", signet);
+            fprintRTF("{\\*\\bkmkstart _BM_%s}", signet);
             if (hidden)
                 fprintRTF("{\\v ");
         }
@@ -790,7 +790,7 @@ void InsertBookmarkHidden(char *name, char *text, int hidden)
         if (fields_use_REF()) {
             if (hidden)
                 fprintRTF("}");
-            fprintRTF("{\\*\\bkmkend BM_%s}", signet);
+            fprintRTF("{\\*\\bkmkend _BM_%s}", signet);
         }
     }
 
@@ -846,7 +846,7 @@ void CmdLabel(int code)
                 
             if (fields_use_REF()) {
                 /*fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM%s \\\\* MERGEFORMAT }}", signet);*/
-		fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BM_%s \\\\* CHARFORMAT}}", signet);
+                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF _BM_%s \\\\* CHARFORMAT \\\\h}}", signet);
 		fprintRTF("{\\fldrslt{");
             }
             
@@ -864,7 +864,7 @@ void CmdLabel(int code)
             if (code == LABEL_VREF) {
                 fprintRTF(" ");
                 if (fields_use_REF()) {
-                    fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM_%s \\\\p }}", signet);
+                    fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF _BM_%s \\\\p }}", signet);
                     fprintRTF("{\\fldrslt{");
                 }
                 fprintRTF("%s", signet);
@@ -882,7 +882,7 @@ void CmdLabel(int code)
             /*signet = strdup_nobadchars(text);*/
 	    signet = make_signet(text);
             if (fields_use_REF()) {
-                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF BM_%s \\\\* MERGEFORMAT }}", signet);
+                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 PAGEREF _BM_%s \\\\* MERGEFORMAT }}", signet);
                 fprintRTF("{\\fldrslt{");
             }
             fprintRTF("%s", signet);
@@ -1631,7 +1631,7 @@ void CmdCite(int code)
             }
             t = s ? s : signet; /* if .aux is missing or * incomplete use original * citation */
             if (fields_use_REF()) {
-                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF BIB_%s \\\\* MERGEFORMAT }}", signet);
+                fprintRTF("{\\field{\\*\\fldinst{\\lang1024 REF _BIB_%s \\\\* CHARFORMAT \\\\h}}", signet);
                 fprintRTF("{\\fldrslt{");
             }
             ConvertString(t);
