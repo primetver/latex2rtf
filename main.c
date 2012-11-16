@@ -706,9 +706,9 @@ static void InitializeLatexLengths(void)
     setLength("rightmargin", 0 * 20);   /* distance from the right edge of the current environment to the right margin of the item body. Defaults to 0. */
 
     /* Other envoronments lengths */
-    setLength("floatsep", 0 * 20);
-    setLength("intextsep", 0 * 20);
-    setLength("textfloatsep", 0 * 20);
+    setLength("floatsep", 12 * 20);
+    setLength("intextsep", 12 * 20);
+    setLength("textfloatsep", 20 * 20);
     setLength("abovedisplayskip", 0 * 20);
     setLength("belowdisplayskip", 0 * 20);
     setLength("abovecaptionskip", 0 * 20);

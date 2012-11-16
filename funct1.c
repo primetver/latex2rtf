@@ -790,12 +790,8 @@ void CmdCaption(int code)
     char *thecaption;
     char *lst_entry;
     int n, vspace;
-    char old_align;
     char number[20];
     char c;
-
-    old_align = getAlignment();
-    setAlignment(CENTERED);
 
     lst_entry = getBracketParam();
     thecaption = getBraceParam();
@@ -811,14 +807,15 @@ void CmdCaption(int code)
     
     if (getTexMode() != MODE_VERTICAL)
         CmdEndParagraph(0);
-    vspace = getLength("abovecaptionskip");
+
+    vspace = getLength("abovecaptionskip") + g_processing_figure ? 0 : getLength("textfloatsep");
     setVspace(vspace);
 
     /* Different styles for figure and table captions *NI*/
     if (g_processing_figure) {
         /* caption below */
         startParagraph("caption figure", PARAGRAPH_FIRST);
-	fprintRTF("{");
+        fprintRTF("\\sl240\\slmult1 {");
         incrementCounter("figure");
         ConvertBabelName("FIGURENAME");
         fprintRTF(" ");
@@ -827,7 +824,7 @@ void CmdCaption(int code)
     } else {
         /* caption above */
 	startParagraph("caption table", PARAGRAPH_FIRST);
-	fprintRTF("\\keepn {");
+        fprintRTF("\\keepn\\sl240\\slmult1 {");
         incrementCounter("table");
         ConvertBabelName("TABLENAME");
         fprintRTF(" ");
@@ -867,9 +864,8 @@ void CmdCaption(int code)
     free(thecaption);
 
     CmdEndParagraph(0);
-    vspace = getLength("belowcaptionskip") + getLength("textfloatsep");
+    vspace = getLength("belowcaptionskip") + g_processing_figure ? getLength("textfloatsep") : 0;
     setVspace(vspace);
-    setAlignment(old_align);
     diagnostics(4, "exiting CmdCaption");
 }
 
@@ -1785,7 +1781,7 @@ void CmdFigure(int code)
         oldalignment = getAlignment();
         setAlignment(CENTERED);
         CmdIndent(INDENT_NONE);
-        CmdVspace(VSPACE_BIG_SKIP);
+        setVspace(getLength("textfloatsep"));
         
         if (real_code == WRAP_FIGURE) {
             lines    = getBracketParam();
@@ -1840,7 +1836,7 @@ void CmdFigure(int code)
         setAlignment(oldalignment);
         CmdEndParagraph(0);
         CmdIndent(INDENT_USUAL);
-        CmdVspace(VSPACE_BIG_SKIP);
+        setVspace(getLength("textfloatsep"));
     }
 }
 
