@@ -2244,22 +2244,41 @@ void CmdRule(int code)
 }
 
 /******************************************************************************
-  purpose: handles \begin{sloppypar} ... \end{sloppypar} 
-                   \begin{landscape} ... \end{landscape} 
+  purpose: handles \begin{landscape} ... \end{landscape}
   
   This function is used to continue processing the contents of the environment,
-  without changing anything.  This is useful when the latex markup has no real
-  meaning for the RTF conversion, but the contents of the environment should still
-  be processed. 
+  in landscape orientation. Starts new rtf section on entering and exiting environment.
+ ******************************************************************************/
+void CmdLandscape(int code)
+{
+    if (code == ON) {
+        diagnostics(4, "Entering CmdLandscape \\begin{landscape}");
+        setLandscape(TRUE);
+    } 
+    
+    if (code == OFF) {
+        diagnostics(4, "Exiting CmdLandscape \\end{landscape}");
+        setLandscape(FALSE);
+    }
+}
+
+/******************************************************************************
+ * purpose: handles \begin{sloppypar} ... \end{sloppypar}
+ *                  \begin{landscape} ... \end{landscape}
+ * 
+ * This function is used to continue processing the contents of the environment,
+ * without changing anything.  This is useful when the latex markup has no real
+ * meaning for the RTF conversion, but the contents of the environment should still
+ * be processed.
  ******************************************************************************/
 void CmdTolerateEnviron(int code)
 {
     if (code == ON) {
-            diagnostics(4, "Entering CmdTolerateEnviron \\begin{environ}");
-    } 
+        diagnostics(4, "Entering CmdTolerateEnviron \\begin{environ}");
+    }
     
     if (code == OFF) {
-            diagnostics(4, "Exiting CmdTolerateEnviron \\end{environ}");
+        diagnostics(4, "Exiting CmdTolerateEnviron \\end{environ}");
     }
 }
 

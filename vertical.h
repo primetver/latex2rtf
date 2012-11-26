@@ -30,6 +30,10 @@ extern char TexModeName[7][25];
 #define LINE_SPACING_ONE_AND_A_HALF 360
 #define LINE_SPACING_DOUBLE         480
 
+#define NewPage 1
+#define NewColumn 2
+#define NewSection 3
+
 void CmdBeginEnd(int code);
 void CmdEndParagraph(int code);
 void CmdVspace(int code);
@@ -40,6 +44,8 @@ void CmdIndent(int code);
 void CmdNewPage(int code);
 void CmdAlign(int code);
 void CmdHfill(int code);
+
+void setLandscape(int mode);
 
 void setLeftMarginIndent(int indent);
 void setRightMarginIndent(int indent);

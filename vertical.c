@@ -47,6 +47,7 @@ that affect these quantities
 #include <errno.h>
 #include <ctype.h>
 #include "main.h"
+#include "preamble.h"
 #include "funct1.h"
 #include "cfg.h"
 #include "utils.h"
@@ -73,6 +74,9 @@ static int g_right_margin_indent;
 static int g_left_margin_indent;
 static int g_page_new = FALSE;
 static int g_column_new = FALSE;
+static int g_section_new = FALSE;
+static int g_landscape = FALSE;
+static int g_landscape_mode = FALSE;
 static int g_alignment = JUSTIFIED;
 static int g_par_brace = 0;
 
@@ -82,6 +86,13 @@ char TexModeName[7][25] = { "bad", "internal vertical", "horizontal",
 
 char ParOptionName[8][13] = { "bad", "FIRST", "GENERIC", "SECTION", 
                               "EQUATION", "SLASHSLASH", "LIST", "ENVIRONMENT"};
+
+
+void setLandscape(int mode)
+{
+    g_landscape_mode = mode;
+    CmdNewPage(NewSection);
+}
 
 /******************************************************************************
      left and right margin accessor functions
@@ -356,8 +367,31 @@ void startParagraph(const char *style, int indenting)
     diagnostics(6, "current font series %d", CurrentFontSeries());
     diagnostics(6, "current font shape  %d", CurrentFontShape());
 
+    if (g_section_new) {
+       /* if (g_landscape == TRUE) {
+            fprintRTF("\\lndscpsxn\\pgwsxn%d\\pghsxn%d\nTEST1", getLength("pageheight"), getLength("pagewidth"));
+            g_landscape = FALSE;
+        } else {
+            fprintRTF("\\sect\\sectd\n");
+        }*/
+
+       
+       if (g_landscape == TRUE)
+           fprintRTF("\\pgwsxn%d\\pghsxn%d\\lndscpsxn\n", getLength("pageheight"), getLength("pagewidth"));
+
+        fprintRTF("\\sect\\sectd\n");
+
+        correctLengths(g_landscape_mode);
+
+        g_landscape = g_landscape_mode;
+        g_section_new = FALSE;
+        g_page_new = FALSE;
+        g_column_new = FALSE;
+        vspace = 0;
+    }
+
     if (g_page_new) {
-        fprintRTF("\\page\n");          /* causes new page */
+        fprintRTF("\\page\n");                   /* causes new page */
         g_page_new = FALSE;
         g_column_new = FALSE;
         vspace = 0;
@@ -365,9 +399,9 @@ void startParagraph(const char *style, int indenting)
 
     if (g_column_new) {
         if (twocolumn)
-            fprintRTF("\\column\n");    /* causes new column */
+            fprintRTF("\\column\n");            /* causes new column */
         else
-            fprintRTF("\\page\n");      /* added: causes new page */
+            fprintRTF("\\page\n");              /* added: causes new page if only one column */
         g_column_new = FALSE;
         vspace = 0;
     }
@@ -587,6 +621,10 @@ parameter: code: newpage or newcolumn-option
 
         case NewColumn:
             g_column_new = TRUE;
+            break;
+            
+        case NewSection:
+            g_section_new = TRUE;
             break;
     }
 

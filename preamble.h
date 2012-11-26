@@ -46,5 +46,8 @@ void CmdTitleHeadFoot(int code);
 void CmdThePage(int code);
 void setPackageInputenc(char * option);
 void setPackageBabel(char * option);
+void correctLengths(int landscape);
 void CmdGeometry(int code);
 void CmdESKDtheTitle(int code);
+
+

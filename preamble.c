@@ -85,7 +85,6 @@ static void WriteStyleHeader(void);
 static void WritePageSize(void);
 void ParseOptGeometry(char *options);
 void ExecGeomOptions (char *option, char *value1, char *value2);
-void correct_lengths(void);
 
 void setPackageBabel(char *option)
 {
@@ -866,14 +865,14 @@ void ExecGeomOptions (char *key, char *value1, char *value2)
         ExecGeomOptions ("vmarginratio", "1", "1");
         ExecGeomOptions ("hmarginratio", "1", "1");
     }
-    correct_lengths();
+    correctLengths(FALSE);
 }
 
-void correct_lengths(void)
+void correctLengths(int landscape)
 {
   int page_w, page_h;
-  page_w = getLength("pagewidth");
-  page_h = getLength("pageheight");
+  page_w = landscape ? getLength("pageheight") : getLength("pagewidth");
+  page_h = landscape ? getLength("pagewidth")  : getLength("pageheight");
   
   if (page_w) {
     setLength("textwidth", page_w - g_geomMargl - g_geomMargr);
@@ -1479,9 +1478,9 @@ void CmdTitleHeadFoot(int code)
  ******************************************************************************/
 {
     if (code != 0)
-        fprintRTF("{\\footerf ");
+        fprintRTF("\\titlepg {\\footerf ");
     else
-        fprintRTF("{\\headerf ");
+        fprintRTF("\\titlepg {\\headerf ");
     
     ConvertString(getBraceParam());
     fprintRTF("}\n");
@@ -1676,13 +1675,12 @@ purpose: writes header info for the RTF file
  ****************************************************************************/
 {
     int family = DefaultFontFamily();
-
 /*  int size   = DefaultFontSize(); */
 
     diagnostics(4, "Writing header for RTF file");
 
 /*  fprintRTF("{\\rtf1\\ansi\\fs%d\\deff%d\\deflang1024\n", size, family); */
-    fprintRTF("{\\rtf1\\ansi\\uc1\\deff%d\\deflang1024\\titlepg\n", family);
+    fprintRTF("{\\rtf1\\ansi\\uc1\\deff%d\\deflang1024\n", family);
     WriteFontHeader();
     WriteColorTable();
     WriteStyleHeader();

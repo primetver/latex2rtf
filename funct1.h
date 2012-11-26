@@ -152,9 +152,6 @@ void CmdMinipage(int code);
 #define One_Column 1
 #define Two_Column 2
 
-#define NewPage 1
-#define NewColumn 2
-
 #define ABSTRACT_SIMPLE             1
 #define ABSTRACT_BEGIN_END          2
 #define ABSTRACT_PRELUDE_BEGIN      3
@@ -191,6 +188,7 @@ void CmdResizeBox(int code);
 void CmdTextFont(int code);
 void CmdThe(int code);
 void CmdRule(int code);
+void CmdLandscape(int code);
 void CmdTolerateEnviron(int code);
 void CmdIflatextortf(int code);
 void CmdNewif(int code);
