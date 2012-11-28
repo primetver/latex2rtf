@@ -60,6 +60,7 @@ Authors:
 static int g_chapter_numbering = ARABIC_NUMBERING;
 static int g_section_numbering = ARABIC_NUMBERING;
 static int g_appendix = 0;
+static int g_eskd_appendix = 0;
 
 /* LaTeX commands for Russin letters:
   c -- Capital
@@ -642,33 +643,50 @@ void CmdSection(int code)
 
         case SECT_NORM:
         case SECT_NORM_STAR:
-            setVspace(getLength("beforesectionskip"));
+            setVspace(g_eskd_appendix ? getLength("beforesubsectionskip") : getLength("beforesectionskip"));
             if (g_document_type == FORMAT_APA) {
                 startParagraph("section", PARAGRAPH_SECTION_TITLE);
             } else {                 
-                startParagraph("section", PARAGRAPH_SECTION_TITLE);
-                if (g_appendix && ESKDMode) {
-                    unit_name = GetBabelName("APPENDIXNAME");
-                    ConvertString(unit_name);
-                    fprintRTF("\\emspace ");
-                }     
-                if (code == SECT_NORM && getCounter("secnumdepth") >= 0) {
-                    incrementCounter("section");
-                    setCounter("subsection", 0);
-                    resetTheoremCounter("section");
-                    unit_label = FormatUnitNumber("section");
-                    InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("\\emspace ");
+                if (g_eskd_appendix) {
+                    /* format as subsection */
+                    if (RussianMode) {
+                        if (code == SECT_NORM) {
+                            setLength("parindent", -amount);
+                            setLeftMarginIndent(orig_left_margin + orig_indent + amount);
+                        } else {
+                            setLeftMarginIndent(orig_left_margin + orig_indent);
+                        }
+                    }
+                    startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
+                    if (code == SECT_NORM && getCounter("secnumdepth") >= 1) {
+                        incrementCounter("subsection");
+                        setCounter("subsubsection", 0);
+                        resetTheoremCounter("subsection");
+                        unit_label = FormatUnitNumber("subsection");
+                        InsertBookmark(g_section_label, unit_label);
+                        fprintRTF("\\tab ");
+                    }
+                } else {
+                    /* normal section */
+                    startParagraph("section", PARAGRAPH_SECTION_TITLE);
+                    if (code == SECT_NORM && getCounter("secnumdepth") >= 0) {
+                        incrementCounter("section");
+                        setCounter("subsection", 0);
+                        resetTheoremCounter("section");
+                        unit_label = FormatUnitNumber("section");
+                        InsertBookmark(g_section_label, unit_label);
+                        fprintRTF("\\emspace ");
+                    }
                 }
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            setVspace(getLength("aftersectionskip"));
+            setVspace(g_eskd_appendix ? getLength("aftersubsectionskip") : getLength("aftersectionskip"));
             break;
 
         case SECT_SUB:
         case SECT_SUB_STAR:
-            setVspace(getLength("beforesubsectionskip"));
+            setVspace(g_eskd_appendix ? getLength("beforesubsubsectionskip") : getLength("beforesubsectionskip"));
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
             } else {
@@ -680,24 +698,40 @@ void CmdSection(int code)
                         setLeftMarginIndent(orig_left_margin + orig_indent);
                     }
                 }
-                startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
-                if (code == SECT_SUB && getCounter("secnumdepth") >= 1) {
-                    incrementCounter("subsection");
-                    setCounter("subsubsection", 0);
-                    resetTheoremCounter("subsection");
-                    unit_label = FormatUnitNumber("subsection");
-                    InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("\\tab ");
+                if (g_eskd_appendix) {
+                    /* format as subsubsection */
+                    startParagraph("subsubsection", PARAGRAPH_SECTION_TITLE);
+                    if (code == SECT_SUB && (getCounter("secnumdepth") > 2 ||
+                        (g_document_type == FORMAT_ARTICLE && getCounter("secnumdepth") == 2))) {
+                            incrementCounter("subsubsection");
+                            setCounter("paragraph", 0);
+                            setCounter("subparagraph", 0);
+                            resetTheoremCounter("subsubsection");
+                            unit_label = FormatUnitNumber("subsubsection");
+                            InsertBookmark(g_section_label, unit_label);
+                            fprintRTF("\\tab ");
+                    }
+                } else {
+                    /* normal subsection */
+                    startParagraph("subsection", PARAGRAPH_SECTION_TITLE);
+                    if (code == SECT_SUB && getCounter("secnumdepth") >= 1) {
+                        incrementCounter("subsection");
+                        setCounter("subsubsection", 0);
+                        resetTheoremCounter("subsection");
+                        unit_label = FormatUnitNumber("subsection");
+                        InsertBookmark(g_section_label, unit_label);
+                        fprintRTF("\\tab ");
+                    }
                 }
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            setVspace(getLength("aftersubsectionskip"));
+            setVspace(g_eskd_appendix ? getLength("aftersubsubsectionskip") : getLength("aftersubsectionskip"));
             break;
 
         case SECT_SUBSUB:
         case SECT_SUBSUB_STAR:
-            setVspace(getLength("beforesubsubsectionskip"));
+            setVspace(g_eskd_appendix ? getLength("beforeparagraphskip") : getLength("beforesubsubsectionskip"));
             if (g_document_type == FORMAT_APA) {
                 startParagraph("subsubsection", PARAGRAPH_GENERIC);
                 fprintRTF("{\\i ");
@@ -705,49 +739,75 @@ void CmdSection(int code)
                 fprintRTF(".} ");
             } else {
                 if (RussianMode) {
-                    if (code == SECT_SUBSUB) {
+                    if (code == SECT_SUBSUB && !g_eskd_appendix) {
                         setLength("parindent", -amount);
                         setLeftMarginIndent(orig_left_margin + orig_indent + amount);
                     } else {
                         setLeftMarginIndent(orig_left_margin + orig_indent);
                     }
                 }
-                startParagraph("subsubsection", PARAGRAPH_SECTION_TITLE);
-                
-                if (code == SECT_SUBSUB && (getCounter("secnumdepth") > 2 ||
-                    (g_document_type == FORMAT_ARTICLE && getCounter("secnumdepth") == 2))) {
-                    incrementCounter("subsubsection");
-                    setCounter("paragraph", 0);
-                    setCounter("subparagraph", 0);
-                    resetTheoremCounter("subsubsection");
-                    unit_label = FormatUnitNumber("subsubsection");
-                    InsertBookmark(g_section_label, unit_label);
-                    fprintRTF("\\tab ");
+                if (g_eskd_appendix) {
+                    /* format as paragraph */
+                    startParagraph("paragraph", PARAGRAPH_SECTION_TITLE);
+                    if (code == SECT_SUBSUB && getCounter("secnumdepth") >= 3) {
+                        incrementCounter("paragraph");
+                        resetTheoremCounter("paragraph");
+                        unit_label = FormatUnitNumber("paragraph");
+                        setCounter("subparagraph", 0);
+                        InsertBookmark(g_section_label, unit_label);
+                        fprintRTF("\\emspace ");
+                    }                
+                } else {
+                    /* normal subsection */
+                    startParagraph("subsubsection", PARAGRAPH_SECTION_TITLE);
+                    if (code == SECT_SUBSUB && (getCounter("secnumdepth") > 2 ||
+                        (g_document_type == FORMAT_ARTICLE && getCounter("secnumdepth") == 2))) {
+                        incrementCounter("subsubsection");
+                        setCounter("paragraph", 0);
+                        setCounter("subparagraph", 0);
+                        resetTheoremCounter("subsubsection");
+                        unit_label = FormatUnitNumber("subsubsection");
+                        InsertBookmark(g_section_label, unit_label);
+                        fprintRTF("\\tab ");
+                    }
                 }
                 ConvertString(heading);
                 CmdEndParagraph(0);
-                setVspace(getLength("aftersubsubsectionskip"));
+                setVspace(g_eskd_appendix ? getLength("afterparagraphskip") : getLength("aftersubsubsectionskip"));
             }
             break;
 
         case SECT_SUBSUBSUB:
         case SECT_SUBSUBSUB_STAR:
-            setVspace(getLength("beforeparagraphskip"));
+            setVspace(g_eskd_appendix ? getLength("beforesubparagraphskip") : getLength("beforeparagraphskip"));
             if (RussianMode) {
                 setLeftMarginIndent(orig_left_margin + orig_indent);
             }
-            startParagraph("paragraph", PARAGRAPH_SECTION_TITLE);
-            if (code == SECT_SUBSUBSUB && getCounter("secnumdepth") >= 3) {
-                incrementCounter("paragraph");
-                resetTheoremCounter("paragraph");
-                unit_label = FormatUnitNumber("paragraph");
-                setCounter("subparagraph", 0);
-                InsertBookmark(g_section_label, unit_label);
-                fprintRTF("\\emspace ");
+            if (g_eskd_appendix) {
+                /* format as subparagraph */
+                startParagraph("subparagraph", PARAGRAPH_SECTION_TITLE);
+                if (code == SECT_SUBSUBSUB && getCounter("secnumdepth") >= 4) {
+                    incrementCounter("subparagraph");
+                    resetTheoremCounter("subparagraph");
+                    unit_label = FormatUnitNumber("subparagraph");
+                    InsertBookmark(g_section_label, unit_label);
+                    fprintRTF("\\emspace ");
+                }
+            } else {
+                /* normal paragraph */
+                startParagraph("paragraph", PARAGRAPH_SECTION_TITLE);
+                if (code == SECT_SUBSUBSUB && getCounter("secnumdepth") >= 3) {
+                    incrementCounter("paragraph");
+                    resetTheoremCounter("paragraph");
+                    unit_label = FormatUnitNumber("paragraph");
+                    setCounter("subparagraph", 0);
+                    InsertBookmark(g_section_label, unit_label);
+                    fprintRTF("\\emspace ");
+                }
             }
             ConvertString(heading);
             CmdEndParagraph(0);
-            setVspace(getLength("afterparagraphskip"));
+            setVspace(g_eskd_appendix ? getLength("aftersubparagraphskip") : getLength("afterparagraphskip"));
             break;
 
         case SECT_SUBSUBSUBSUB:
@@ -757,7 +817,7 @@ void CmdSection(int code)
                 setLeftMarginIndent(orig_left_margin + orig_indent);
             }
             startParagraph("subparagraph", PARAGRAPH_SECTION_TITLE);
-            if (code == SECT_SUBSUBSUBSUB && getCounter("secnumdepth") >= 4) {
+            if (code == SECT_SUBSUBSUBSUB && getCounter("secnumdepth") >= 4 && !g_eskd_appendix) {
                 incrementCounter("subparagraph");
                 resetTheoremCounter("subparagraph");
                 unit_label = FormatUnitNumber("subparagraph");
@@ -2738,6 +2798,8 @@ void CmdESKDappendix(int code)
     if (!g_appendix)
         /* start the appendix mode if we are not in */
         CmdAppendix(0);
+
+    g_eskd_appendix=1;
 
     char *type = getBraceParam();
     char *heading = getBraceParam();
