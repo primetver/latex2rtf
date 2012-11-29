@@ -799,7 +799,9 @@ static CommandArray params[] = {
     {"theindex", CmdIgnoreEnviron, 0},
     {"landscape", CmdLandscape, 0},
     {"sloppypar", CmdTolerateEnviron, 0},
-    {"doublespace", CmdSpacingEnviron, 2},
+    {"singlespace", CmdSpacingEnviron, LINE_SPACING_SINGLE},
+    {"onehalfspace", CmdSpacingEnviron, LINE_SPACING_ONE_AND_A_HALF},
+    {"doublespace", CmdSpacingEnviron, LINE_SPACING_DOUBLE},
     {"spacing", CmdSpacingEnviron, 0},
     
     {"small", CmdFontSizeEnviron, 12},

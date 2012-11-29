@@ -651,15 +651,15 @@ void CmdSpacingEnviron(int code)
 
     if (code & ON) {
         originalSpacing = getLineSpacing();
-        if (true_code==2)
-                setLineSpacing(480);
+        if (true_code != 0)
+            setLineSpacing(true_code);
         else {
-                sizeParam = getBraceParam();
-                if (*sizeParam) {
-                        sscanf(sizeParam, "%f", &spacing);
-                        setLineSpacing((int)240*spacing);
-                        free(sizeParam);
-                }
+            sizeParam = getBraceParam();
+            if (*sizeParam) {
+                    sscanf(sizeParam, "%f", &spacing);
+                    setLineSpacing((int)240*spacing);
+                    free(sizeParam);
+            }
         }
         PushEnvironment(SPACING_MODE);
         return;

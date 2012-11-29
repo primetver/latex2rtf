@@ -239,9 +239,9 @@ void CmdFontFamily(int code)
         case F_FAMILY_SANSSERIF_2:
         case F_FAMILY_TYPEWRITER_2:
         case F_FAMILY_CALLIGRAPHIC_2:
-            if (getTexMode() == MODE_VERTICAL)
-                changeTexMode(MODE_HORIZONTAL);
             s = getBraceParam();
+            if (strlen(s) != 0 && getTexMode() == MODE_VERTICAL)
+                changeTexMode(MODE_HORIZONTAL);
             fprintRTF("{\\f%d ", num);
             ConvertString(s);
             fprintRTF("}");
@@ -362,6 +362,7 @@ void CmdFontSeries(int code)
  ****************************************************************************/
 {
     int true_code = code & ~ON;
+    char *s;
 
     diagnostics(5, "CmdFontSeries (before) depth=%d, family=%d, size=%d, shape=%d, series=%d",
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
@@ -375,6 +376,13 @@ void CmdFontSeries(int code)
 //    if (getTexMode() == MODE_VERTICAL)
 //        changeTexMode(MODE_HORIZONTAL);
 
+
+    if (true_code == F_SERIES_BOLD_2 || true_code == F_SERIES_MEDIUM_2) {
+        s = getBraceParam();
+        if (strlen(s) != 0 && getTexMode() == MODE_VERTICAL)
+            changeTexMode(MODE_HORIZONTAL);
+    }
+        
     switch (code) {
         case F_SERIES_MEDIUM_3:
         case F_SERIES_MEDIUM:
@@ -400,14 +408,13 @@ void CmdFontSeries(int code)
             break;
 
         case F_SERIES_BOLD_2:
+            if (getTexMode() == MODE_VERTICAL)
+                    changeTexMode(MODE_HORIZONTAL);
             fprintRTF("{\\b ");
             break;
     }
 
     if (true_code == F_SERIES_BOLD_2 || true_code == F_SERIES_MEDIUM_2) {
-        char *s;
-
-        s = getBraceParam();
         ConvertString(s);
         fprintRTF("}");
         free(s);
