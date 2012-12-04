@@ -75,8 +75,8 @@ static int g_left_margin_indent;
 static int g_page_new = FALSE;
 static int g_column_new = FALSE;
 static int g_section_new = FALSE;
-static int g_landscape = FALSE;
 static int g_landscape_mode = FALSE;
+static int g_landscape = FALSE;
 static int g_alignment = JUSTIFIED;
 static int g_par_brace = 0;
 
@@ -92,6 +92,12 @@ void setLandscape(int mode)
 {
     g_landscape_mode = mode;
     CmdNewPage(NewSection);
+    correctLengths();
+}
+
+int getLandscape()
+{
+    return g_landscape_mode;
 }
 
 /******************************************************************************
@@ -375,14 +381,12 @@ void startParagraph(const char *style, int indenting)
             fprintRTF("\\sect\\sectd\n");
         }*/
 
-       
-       if (g_landscape == TRUE)
+        if (g_landscape)
            fprintRTF("\\pgwsxn%d\\pghsxn%d\\lndscpsxn\n", getLength("pageheight"), getLength("pagewidth"));
-
+        
         fprintRTF("\\sect\\sectd\n");
-
-        correctLengths(g_landscape_mode);
-
+        
+        /*correctLengths(g_landscape_mode);*/
         g_landscape = g_landscape_mode;
         g_section_new = FALSE;
         g_page_new = FALSE;

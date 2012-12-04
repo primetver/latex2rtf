@@ -46,6 +46,7 @@ void CmdAlign(int code);
 void CmdHfill(int code);
 
 void setLandscape(int mode);
+int  getLandscape();
 
 void setLeftMarginIndent(int indent);
 void setRightMarginIndent(int indent);
