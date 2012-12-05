@@ -91,8 +91,7 @@ char ParOptionName[8][13] = { "bad", "FIRST", "GENERIC", "SECTION",
 void setLandscape(int mode)
 {
     g_landscape_mode = mode;
-    if (!g_landscape_mode)
-        CmdNewPage(NewSection);
+    CmdNewPage(NewSection);
     correctLengths();
 }
 
@@ -375,15 +374,20 @@ void startParagraph(const char *style, int indenting)
     diagnostics(6, "current font shape  %d", CurrentFontShape());
 
     if (g_section_new) {
-/*        if (g_landscape)
-           fprintRTF("\\pgwsxn%d\\pghsxn%d\\lndscpsxn\n", getLength("pageheight"), getLength("pagewidth"));*/
+       /* if (g_landscape == TRUE) {
+            fprintRTF("\\lndscpsxn\\pgwsxn%d\\pghsxn%d\nTEST1", getLength("pageheight"), getLength("pagewidth"));
+            g_landscape = FALSE;
+        } else {
+            fprintRTF("\\sect\\sectd\n");
+        }*/
+
+        if (g_landscape)
+           fprintRTF("\\pgwsxn%d\\pghsxn%d\\lndscpsxn\n", getLength("pageheight"), getLength("pagewidth"));
         
-        fprintRTF("\\sect\\sectd\n");            /* causes new section */
-        if (g_landscape_mode)
-            fprintRTF("\\pgwsxn%d\\pghsxn%d\\lndscpsxn\n", getLength("pageheight"), getLength("pagewidth"));
+        fprintRTF("\\sect\\sectd\n");
         
         /*correctLengths(g_landscape_mode);*/
-        /*g_landscape = g_landscape_mode;*/
+        g_landscape = g_landscape_mode;
         g_section_new = FALSE;
         g_page_new = FALSE;
         g_column_new = FALSE;
