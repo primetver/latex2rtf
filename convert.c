@@ -809,14 +809,23 @@ returns: success or not
 
     if (strcmp(cCommand, "begin") == 0) {
         char *param, *source;
+        int i;
         param = getBraceParam();
         source = strdup_together3("{", param, "}");
+        diagnostics(WARNING, "SOURCE=%s", source);
+        i = strlen(source);
+        while(i) {
+            ungetTexChar(source[i-1]);
+            i--;
+        }
+     
         if (strcmp(param, "landscape") == 0)
             /* insert new section right here, before brace */
             fprintRTF("\\sect\\sectd\\pgwsxn%d\\pghsxn%d\\lndscpsxn\n", getLength("pageheight"), getLength("pagewidth"));
+
         fprintRTF("{");
         PushBrace();
-        PushSource(NULL, source);
+
         free(param);
         free(source);
     }
