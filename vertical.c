@@ -412,6 +412,7 @@ void startParagraph(const char *style, int indenting)
 
     if (!g_processing_cell) {
         fprintRTF("\\pard\\plain");
+       
         InsertStyle(the_style);
     
         if (strcmp(the_style,"equation")==0)

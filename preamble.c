@@ -392,19 +392,22 @@ static void setPaperSize(char *option)
 static void setPointSize(char *option)
 {
     if (strcmp(option, "10pt") == 0) {
-        InitializeDocumentFont(-1, 20, -1, -1, ENCODING_1252);
+       /* InitializeDocumentFont(-1, 20, -1, -1, ENCODING_1252); */
+        InitializeDocumentFont(-1, 20, -1, -1, -1);
         setLength("baselineskip", 12 * 20);
         setLength("parindent", 15 * 20);
         setLength("parskip", 0 * 20);
 
     } else if (strcmp(option, "11pt") == 0) {
-        InitializeDocumentFont(-1, 22, -1, -1, ENCODING_1252);
+       /* InitializeDocumentFont(-1, 22, -1, -1, ENCODING_1252); */
+        InitializeDocumentFont(-1, 22, -1, -1, -1);
         setLength("baselineskip", 14 * 20);
         setLength("parindent", 17 * 20);
         setLength("parskip", 0 * 20);
 
     } else {
-        InitializeDocumentFont(-1, 24, -1, -1, ENCODING_1252);
+       /* InitializeDocumentFont(-1, 24, -1, -1, ENCODING_1252); */
+        InitializeDocumentFont(-1, 24, -1, -1, -1);
         setLength("baselineskip", (int) 14.5 * 20);
         setLength("parindent", 18 * 20);
         setLength("parskip", 0 * 20);
@@ -599,15 +602,15 @@ void CmdDocumentStyle(int code)
     } else
         diagnostics(WARNING, "Document format <%s> unknown, using article format", format);
     
-    /* Try to include support file for document class *NI*/
+    /* try to include support file for document class *NI*/
     char *texsource;
     texsource = strdup_together(format, ".tex");
     if (PushSource(texsource, NULL) == 0)
         diagnostics(WARNING, "Include %s class support file...", texsource);
     else
         if (ESKDMode == TRUE)
-        /* support for eskdtext is mantadory *NI*/
-        diagnostics(ERROR, "Can't include %s class support file, check if it exists in the config path %s/latex/! Giving Up....", texsource, g_config_path);
+            /* needed support file for eskdtext *NI*/
+            diagnostics(ERROR, "Can't include %s class support file, check if it exists in the config path %s/latex/! Giving Up....", texsource, g_config_path);
     
     if (options_with_spaces) {
         options = strdup_noblanks(options_with_spaces);

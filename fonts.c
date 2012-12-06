@@ -646,16 +646,26 @@ void InitializeDocumentFont(int family, int size, int shape, int series, int enc
            pass -1 to avoid setting any parameter
  ******************************************************************************/
 {
-    if (size >= 0)
+    if (size >= 0) {
         RtfFontInfo[0].size = size;
-    if (family >= 0)
+        RtfFontInfo[FontInfoDepth].size = size;
+    }
+    if (family >= 0) {
         RtfFontInfo[0].family = family;
-    if (shape >= 0)
+        RtfFontInfo[FontInfoDepth].family = family;
+    }
+    if (shape >= 0) {
         RtfFontInfo[0].shape = shape;
-    if (series >= 0)
+        RtfFontInfo[FontInfoDepth].shape = shape;
+    }
+    if (series >= 0) {
         RtfFontInfo[0].series = series;
-    if (encoding >= 0)
+        RtfFontInfo[FontInfoDepth].series = series;
+    }
+    if (encoding >= 0) {
         RtfFontInfo[0].encoding = encoding;
+        RtfFontInfo[FontInfoDepth].encoding = encoding;
+    }
 
     diagnostics(5, "InitializeDocumentFont family=%d, size=%d, shape=%d, series=%d",
       RtfFontInfo[0].family, RtfFontInfo[0].size, RtfFontInfo[0].shape, RtfFontInfo[0].series);
@@ -839,5 +849,4 @@ void MonitorFontChanges(const unsigned char *text)
     diagnostics(6, "MonitorFont after depth=%d, family=%d, size=%d, shape=%d, series=%d",
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
       RtfFontInfo[FontInfoDepth].size, RtfFontInfo[FontInfoDepth].shape, RtfFontInfo[FontInfoDepth].series);
-
 }
