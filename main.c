@@ -739,15 +739,17 @@ static void InitializeLatexLengths(void)
     setLength("aftersubparagraphskip", 6 * 20);
 
     /* Tables */
-    setLength("tabcolsep", 4 * 20);     /* distance between table columns */
+    setLength("tabcolsep", 13 * 20);     /* distance between table columns */
 
     /* Set up deafults for RTF conversion */
-    setCounter("RTFtrpaddb", 0);        /* table cell bottom magrin in twips */
-    setCounter("RTFtrpaddt", 0);        /* table cell top magrin in twips */
-    setCounter("RTFtrpaddl", 130);      /* table cell left magrin in twips */
-    setCounter("RTFtrpaddr", 130);      /* table cell right magrin in twips */
-    setCounter("RTFheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */
-    setCounter("RTFtrkeep", 1);         /* non breake row flag */
+    setLength("tabcellbottom", 0);        /* table cell bottom magrin in twips */
+    setLength("tabcelltop", 0);        /* table cell top magrin in twips */
+    setLength("tabcellleft", 130);      /* table cell left magrin in twips */
+    setLength("tabcellright", 130);      /* table cell right magrin in twips */
+
+    setCounter("tabfitwidth", 1);       /* autofit table to text width */
+    setCounter("tabheadrows", -1);      /* numner of headrows, -1 means try to automatic determine */
+    setCounter("tabrowkeep", 1);         /* non breake row flag */
 }
 
 static void ConvertLatexPreamble(void)

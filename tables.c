@@ -205,7 +205,7 @@ static TabularT *NewTabularFromFormat(const char *format)
                 s++;
                 t=getStringBraceParam(&s);
                 if (t) {
-                    table->width[iCol] = getStringDimension(t) + getCounter("RTFtrpaddl") + getCounter("RTFtrpaddr"); /* add margin space */
+                    table->width[iCol] = getStringDimension(t) + getLength("tabcellleft") + getLength("tabcellright"); /* add margin space */
                     free(t);
                     diagnostics(6,"p item, width=%d, residual='%s'",table->width[iCol], s);
                 }
@@ -625,19 +625,19 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
     int top, bottom;   /* cell borders */
     char *cline;
 
-    int trpaddb = getCounter("RTFtrpaddb");
+    int trpaddb = getLength("tabcellbottom");
 
     /* \\trrh%d\\trgaph%d replaced */
     fprintRTF("{\\trowd\\trpaddb%d\\trpaddl%d\\trpaddr%d\\trpaddt%d\\trpaddfb3\\trpaddfl3\\trpaddfr3\\trpaddft3",
               height > trpaddb ? height : trpaddb,
-              getCounter("RTFtrpaddl"),
-              getCounter("RTFtrpaddr"),
-              getCounter("RTFtrpaddt"));
+              getLength("tabcellleft"),
+              getLength("tabcellright"),
+              getLength("tabcelltop"));
     
     if (headrow)
         fprintRTF("\\trhdr\\trkeepfollow");  /* head row repeat on every page, keep with next row */
    
-    if (getCounter("RTFtrkeep") > 0)
+    if (getCounter("tabrowkeep") > 0)
         fprintRTF("\\trkeep"); /* keep row together (default set to 1) */
        
     cell_start = (char *) this_row;
@@ -772,7 +772,7 @@ static void TabularWriteRow(TabularT *table, const char *this_row, const char *n
     else
       row_num++;
 
-    headrows = getCounter("RTFheadrows");
+    headrows = getCounter("tabheadrows");
     
     TabularBeginRow(table, this_row, next_row, first_row, height, (row_num <= headrows));
     cell_start = (char *) this_row;
@@ -891,6 +891,31 @@ static void TabularSetWidths(TabularT *table)
     for (i=1; i<=table->n; i++) {
         if (table->width[i] == -1) 
             table->width[i] = (int) (min_width + twips_per_char * table->chars[i]);
+    }
+}
+
+/******************************************************************************
+ * purpose:  correct column widths to fit given table_width (in twips)
+ ******************************************************************************/
+static void TabularFitWidth(TabularT *table, int table_width)
+{
+    int total_col_width = 0;
+    int i, rest = 0;
+
+    /* calculate actual width */
+    for (i=1; i<=table->n; i++) {
+        total_col_width += table->width[i];
+    }
+
+    rest = table_width - total_col_width;
+
+    /* if rest too large do nothing */
+    if (abs(rest) > total_col_width / 10)
+        return;
+
+    /* distribute rest proportionally over columns */
+    for (i=1; i<=table->n; i++) {
+        table->width[i] += table->width[i] * rest / total_col_width;
     }
 }
 
@@ -1049,7 +1074,7 @@ void CmdTabular(int code)
             tabular_layout = NewTabularFromFormat(cols);
 
             /* save setting for possible changes in longtable processing */
-            saved_headrows = getCounter("RTFheadrows");
+            saved_headrows = getCounter("tabheadrows");
 
             /* For longtable extract caption and label, process caption before processing rows */
             if (true_code == TABULAR_LONG || true_code == TABULAR_LONG_STAR) {
@@ -1088,7 +1113,7 @@ void CmdTabular(int code)
                         *p++ = ' ';
                 }
 
-                /* count true rows in table head and set counter value for RTFheadrows*/
+                /* count true rows in table head and set counter value for tabheadrows*/
                 if (endhead) {
                     int headrows = 0;
                     p = table;
@@ -1107,13 +1132,13 @@ void CmdTabular(int code)
                         }
                         break;
                     }
-                    setCounter("RTFheadrows", headrows);
+                    setCounter("tabheadrows", headrows);
                 }
             }
             /* for nonlong table provide some automatic for head processing if asked */
             else {
                 if (saved_headrows == -1 && strstr(table, "\\hline"))
-                    setCounter("RTFheadrows", 1);
+                    setCounter("tabheadrows", 1);
             }
 
             /*if (getTexMode() != MODE_HORIZONTAL) {
@@ -1140,6 +1165,11 @@ void CmdTabular(int code)
             }
     
             TabularSetWidths(tabular_layout);
+
+            /* add extra magic - finally fit tabular to text width */
+            if (getCounter("tabfitwidth") > 0)
+                TabularFitWidth(tabular_layout, getLength("textwidth"));
+
             /* PrintTabular(tabular_layout); */
             
             TabularGetRow(table, &this_row, &next_row_start, &this_height);
@@ -1155,7 +1185,7 @@ void CmdTabular(int code)
             }
 
             /* restore setting */
-            setCounter("RTFheadrows", saved_headrows);
+            setCounter("tabheadrows", saved_headrows);
     
             /* free before and after strings */
             if (cols)

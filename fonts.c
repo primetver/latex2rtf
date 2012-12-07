@@ -267,6 +267,7 @@ void CmdFontShape(int code)
  ****************************************************************************/
 {
     int true_code = code & ~ON;
+    char *s;
 
     diagnostics(5, "CmdFontShape (before) depth=%d, family=%d, size=%d, shape=%d, series=%d",
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
@@ -274,10 +275,17 @@ void CmdFontShape(int code)
 
     /* \end{itshape}, \end{sc} ... */
     if (!(code & ON) &&
-      (true_code == F_SHAPE_UPRIGHT_3 || true_code == F_SHAPE_ITALIC_3 ||
+        (true_code == F_SHAPE_UPRIGHT_3 || true_code == F_SHAPE_ITALIC_3 ||
         true_code == F_SHAPE_SLANTED_3 || true_code == F_SHAPE_CAPS_3 ||
         true_code == F_SHAPE_ITALIC_4 || true_code == F_SHAPE_SLANTED_4 || true_code == F_SHAPE_CAPS_4))
         return;
+        
+    if (true_code == F_SHAPE_UPRIGHT_2 || true_code == F_SHAPE_ITALIC_2 ||
+        true_code == F_SHAPE_SLANTED_2 || true_code == F_SHAPE_CAPS_2) {
+        s = getBraceParam();
+        if (strlen(s) != 0 && getTexMode() == MODE_VERTICAL)
+            changeTexMode(MODE_HORIZONTAL);
+    }
 
     switch (true_code) {
 
@@ -335,10 +343,7 @@ void CmdFontShape(int code)
     }
 
     if (true_code == F_SHAPE_UPRIGHT_2 || true_code == F_SHAPE_ITALIC_2 ||
-      true_code == F_SHAPE_SLANTED_2 || true_code == F_SHAPE_CAPS_2) {
-        char *s;
-
-        s = getBraceParam();
+        true_code == F_SHAPE_SLANTED_2 || true_code == F_SHAPE_CAPS_2) {
         ConvertString(s);
         fprintRTF("}");
         free(s);
@@ -372,10 +377,6 @@ void CmdFontSeries(int code)
     if ((true_code == F_SERIES_MEDIUM_3 || true_code == F_SERIES_BOLD_3 ||
         true_code == F_SERIES_BOLD_4) && !(code & ON))
         return;
-
-//    if (getTexMode() == MODE_VERTICAL)
-//        changeTexMode(MODE_HORIZONTAL);
-
 
     if (true_code == F_SERIES_BOLD_2 || true_code == F_SERIES_MEDIUM_2) {
         s = getBraceParam();
@@ -496,9 +497,6 @@ void CmdEmphasize(int code)
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
       RtfFontInfo[FontInfoDepth].size, RtfFontInfo[FontInfoDepth].shape, RtfFontInfo[FontInfoDepth].series);
 
-//    if (getTexMode() == MODE_VERTICAL)
-//        changeTexMode(MODE_HORIZONTAL);
-
     if (true_code == F_EMPHASIZE_3 && !(code & ON))
         return;
 
@@ -521,7 +519,6 @@ void CmdEmphasize(int code)
     diagnostics(5, "CmdEmphasize (after) depth=%d, family=%d, size=%d, shape=%d, series=%d",
       FontInfoDepth, RtfFontInfo[FontInfoDepth].family,
       RtfFontInfo[FontInfoDepth].size, RtfFontInfo[FontInfoDepth].shape, RtfFontInfo[FontInfoDepth].series);
-
 }
 
 void CmdUnderline(int code)
@@ -534,11 +531,11 @@ void CmdUnderline(int code)
 
     diagnostics(5, "Entering CmdUnderline");
 
-    if (getTexMode() == MODE_VERTICAL)
+    s = getBraceParam();
+    if (strlen(s) != 0 && getTexMode() == MODE_VERTICAL) /* add check text */
         changeTexMode(MODE_HORIZONTAL);
 
     fprintRTF("{\\ul ");
-    s = getBraceParam();
     ConvertString(s);
     free(s);
     fprintRTF("}");

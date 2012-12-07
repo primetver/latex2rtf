@@ -130,6 +130,7 @@ static CommandArray commands[] = {
     {"emph", CmdEmphasize, F_EMPHASIZE_2},
     {"underline", CmdUnderline, 0},
     {"underbar", CmdUnderline, 0},
+    {"uline", CmdUnderline, 0},
     {"textnormal", CmdTextNormal, F_TEXT_NORMAL_2},
     {"normalfont", CmdTextNormal, F_TEXT_NORMAL_2},
     {"mathnormal", CmdTextNormal, F_TEXT_NORMAL_3},
