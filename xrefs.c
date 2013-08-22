@@ -56,8 +56,8 @@ char *g_current_ref = NULL;
 int g_suppress_name = FALSE;
 static int g_warned_once = FALSE;
 
-#define MAX_LABELS 200
-#define MAX_CITATIONS 1000
+#define MAX_LABELS 5000
+#define MAX_CITATIONS 5000
 #define MAX_SIGNETS 5000
 #define BIB_STYLE_ALPHA  0
 #define BIB_STYLE_SUPER  1
@@ -766,8 +766,8 @@ void InsertBookmarkHidden(char *name, char *text, int hidden)
     if (!name) {
         if (getTexMode() == MODE_VERTICAL)
             changeTexMode(MODE_HORIZONTAL);
-        /*fprintRTF("%s", text);*/
-        ConvertString(text);
+        if (!hidden)
+            ConvertString(text);
         return;
     }
     
@@ -784,13 +784,14 @@ void InsertBookmarkHidden(char *name, char *text, int hidden)
             fprintRTF("{\\*\\bkmkstart _BM_%s}", signet);
             if (hidden)
                 fprintRTF("{\\v ");
-        }
-        /*fprintRTF("%s", text);*/
-        ConvertString(text);
-        if (fields_use_REF()) {
+            /*fprintRTF("%s", text);*/
+            ConvertString(text);
             if (hidden)
                 fprintRTF("}");
             fprintRTF("{\\*\\bkmkend _BM_%s}", signet);
+        } else {
+            if (!hidden)
+                ConvertString(text);
         }
     }
 
