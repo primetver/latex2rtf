@@ -1265,3 +1265,27 @@ int getSlashSlashParam(void)
     return height;
 }
 
+
+int testTexString(char* str)
+{
+    char cNext = getTexChar();
+    int i = 0;
+    int res = FALSE;
+    int ln = strlen(str);
+
+    while (i < ln && cNext == str[i]) {
+        cNext = getTexChar();
+        i++;
+    }
+
+    if (i == ln )
+        res = TRUE;
+
+    ungetTexChar(cNext);
+    while (i > 0) {
+        ungetTexChar(str[i-1]);
+        i--;
+    }
+    return res;
+}
+

@@ -51,4 +51,6 @@ int     getSlashSlashParam(void);
 void	ignoreBraceParam(void);
 void	ignoreBracketParam(void);
 
+int     testTexString(char*);
+
 #endif

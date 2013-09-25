@@ -221,8 +221,14 @@ purpose: converts inputfile and writes result to outputfile
 
                     if (getTexMode() == MODE_RESTRICTED_HORIZONTAL)
                         fprintRTF("\\~");
-                    else
-                        fprintRTF(" ");
+                    else {
+                        /* TEST */
+                        cNext = getNonSpace();
+                        ungetTexChar(cNext);
+
+                        if (cNext != '\n')
+                            fprintRTF(" ");
+                    }
                 }
 
                 break;
@@ -238,10 +244,17 @@ purpose: converts inputfile and writes result to outputfile
                 } else {
                     cNext = getNonSpace();
 
-                    if (cNext == '\n') {    /* new paragraph ... skip all ' ' and '\n' some*/
+                    if (cNext == '\n') {                /* new paragraph ... skip all ' ' and '\n' some*/
                         CmdEndParagraph(0);
 
-                    } else {    /* add a space if needed */
+                    } else if (cNext == '\\') {        /* TEST command \\item ... skip all ' ' */
+
+                        if (!testTexString("item") && !testTexString("begin") && !testTexString("end")
+                            && getTexMode() != MODE_VERTICAL && cLast != ' ')
+                            fprintRTF(" ");
+                        ungetTexChar(cNext);
+                  
+                    } else {                            /* add a space if needed */
                         ungetTexChar(cNext);
                         if (getTexMode() != MODE_VERTICAL && cLast != ' ')
                             fprintRTF(" ");
