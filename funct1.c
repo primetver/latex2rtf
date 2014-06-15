@@ -629,7 +629,7 @@ void CmdSection(int code)
                 setCounter("equation",0);
                 resetTheoremCounter("chapter");
                 unit_label = FormatUnitNumber("chapter");
-                fprintRTF("\\~\\~ ");
+                fprintRTF("\\~\\~");
                 InsertBookmark(g_section_label, unit_label);
             }
             CmdEndParagraph(0);
@@ -675,7 +675,7 @@ void CmdSection(int code)
                         resetTheoremCounter("section");
                         unit_label = FormatUnitNumber("section");
                         InsertBookmark(g_section_label, unit_label);
-                        fprintRTF("\\~\\~ ");
+                        fprintRTF("\\~\\~");
                     }
                 }
             }
