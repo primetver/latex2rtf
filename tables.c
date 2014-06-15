@@ -657,8 +657,13 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
         TabularGetCell(cell_start, &cell, &cell_end);
         TabularMultiParameters(cell, &span, &align, &multi_left_border, &multi_right_border);
                 
-        if (headrow)
-            fprintRTF("\\clvertalc\\clshdng1000");  /* centered vertial alignment for head row */
+        if (headrow) {
+            fprintRTF("\\clvertalc");  /* centered vertial alignment for head row */
+            if (isColorPackage())
+                fprintRTF("\\clcbpat114");
+            else
+                fprintRTF("\\clshdng1000"); 
+        }  
 
         if (span > 1)
             fprintRTF("\\clmgf");

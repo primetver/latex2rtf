@@ -1644,6 +1644,10 @@ static void WriteColorTable(void)
     fprintRTF("}\n");
 }
 
+int  isColorPackage(){
+    return gColorPackage;
+}
+
 static void WriteInfo(void)
 
 /****************************************************************************
@@ -1691,8 +1695,6 @@ purpose: writes header info for the RTF file
     WriteHeadFoot();
     WritePageSize();
 }
-
-
 
 void CmdESKDtheTitle(int code)
 
