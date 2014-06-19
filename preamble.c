@@ -1641,10 +1641,12 @@ static void WriteColorTable(void)
     fprintRTF("\\red197\\green227\\blue132;\n");    /* Yellow Green */  
     fprintRTF("\\red255\\green182\\blue83;\n"); /* Yellow Orange */   
     
+    fprintRTF("\\red148\\green202\\blue239;\n"); /* Table Head Blue #137 */  
+    
     fprintRTF("}\n");
 }
 
-int  isColorPackage(){
+int  getColorPackage(){
     return gColorPackage;
 }
 

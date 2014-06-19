@@ -659,8 +659,8 @@ static void TabularBeginRow(TabularT *table, const char *this_row, const char *n
                 
         if (headrow) {
             fprintRTF("\\clvertalc");  /* centered vertial alignment for head row */
-            if (isColorPackage())
-                fprintRTF("\\clcbpat114");
+            if (getColorPackage())
+                fprintRTF("\\clcbpat137"); /* Table Head Color #137*/
             else
                 fprintRTF("\\clshdng1000"); 
         }  
